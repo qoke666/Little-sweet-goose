@@ -106,6 +106,9 @@
             background-color: #fce7f3;
             border-color: #db2777;
         }
+        .add-to-cart-btn {
+            z-index: 10;
+        }
         @media (min-width: 768px) {
             .product-card {
                 width: calc((100% - 3rem) / 3);
@@ -247,9 +250,14 @@
                     { size: 'L', diameter: '14 см', weight: '1.2-1.3 кг', price: 2750 }
                 ],
                 fillings: [
-                    { name: 'Ванильная', image: 'https://via.placeholder.com/150?text=Ванильная' },
-                    { name: 'Шоколадная', image: 'https://via.placeholder.com/150?text=Шоколадная' },
-                    { name: 'Ягодная', image: 'https://via.placeholder.com/150?text=Ягодная' }
+                    { name: 'Маковый лимон с клубникой', image: 'https://via.placeholder.com/150?text=Маковый+лимон+с+клубникой' },
+                    { name: 'Тропики манго-маракуйя', image: 'https://via.placeholder.com/150?text=Тропики+манго-маракуйя' },
+                    { name: 'Пломбир малина-апельсин', image: 'https://via.placeholder.com/150?text=Пломбир+малина-апельсин' },
+                    { name: 'Медовик', image: 'https://via.placeholder.com/150?text=Медовик' },
+                    { name: 'Шоколадно-кофейный с крошкой Орео', image: 'https://via.placeholder.com/150?text=Шоколадно-кофейный' },
+                    { name: 'Три шоколада', image: 'https://via.placeholder.com/150?text=Три+шоколада' },
+                    { name: 'Морковный', image: 'https://via.placeholder.com/150?text=Морковный' },
+                    { name: 'Ореховый со сгущёнкой', image: 'https://i.postimg.cc/Kj6VCgFT/image.webp?text=Ореховый+со+сгущёнкой' }
                 ],
                 image: 'https://images.unsplash.com/photo-1614707267537-b85aaf00c3b3?w=400&h=300&fit=crop',
                 category: 'bento',
@@ -743,7 +751,7 @@
                     ${product.fillings ? `
                         <div class="space-y-2">
                             <h3 class="font-semibold text-sm">Начинка</h3>
-                            <div class="grid grid-cols-3 gap-2">
+                            <div class="grid grid-cols-2 gap-2">
                                 ${product.fillings.map(f => `
                                     <button class="filling-btn p-2 rounded-lg border ${appState.selectedFilling === f.name ? 'active border-pink-300 bg-pink-50' : 'hover:border-pink-300'} text-left" onclick="selectFilling('${f.name}')">
                                         <div class="font-medium text-sm">${f.name}</div>
@@ -832,7 +840,7 @@
                                     </svg>
                                     <span class="text-xs">${product.rating.toFixed(1)}</span>
                                 </div>
-                                <button onclick="addToCartById('${product.id}'); event.stopPropagation();" class="absolute bottom-2 right-2 bg-white border border-gray-300 hover:bg-gray-100 p-2 rounded-full">
+                                <button onclick="addToCartById('${product.id}'); event.stopPropagation();" class="add-to-cart-btn absolute bottom-2 right-2 bg-white border border-gray-300 hover:bg-gray-100 p-2 rounded-full">
                                     <svg class="icon w-5 h-5" viewBox="0 0 24 24">
                                         <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                                     </svg>
