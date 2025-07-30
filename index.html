@@ -35,11 +35,15 @@
             min-width: 100px;
         }
         .carousel {
-            scroll-snap-type: x mandatory;
+            display: flex;
+            overflow-x: auto;
+            white-space: nowrap;
+            scroll-behavior: smooth;
+            touch-action: pan-x;
             -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory;
             scrollbar-width: none;
             -ms-overflow-style: none;
-            scroll-behavior: smooth;
         }
         .carousel::-webkit-scrollbar {
             display: none;
@@ -75,7 +79,6 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
- Ascending
             width: 32px;
             height: 32px;
             border-radius: 50%;
@@ -115,6 +118,8 @@
             aspect-ratio: 4/3;
             max-height: 96px;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
         }
         @media (min-width: 768px) {
             .product-card {
@@ -166,7 +171,7 @@
         </div>
 
         <!-- Categories -->
-        <div id="category-carousel" class="carousel flex overflow-x-auto gap-3 mb-6">
+        <div id="category-carousel" class="carousel flex gap-3 mb-6">
             <button class="category-pill px-4 py-2 bg-pink-100 text-pink-600 rounded-full font-medium text-sm active" data-category="bento">Бенто-торт</button>
             <button class="category-pill px-4 py-2 bg-gray-100 hover:bg-pink-100 rounded-full font-medium text-sm" data-category="mochi">Моти</button>
             <button class="category-pill px-4 py-2 bg-gray-100 hover:bg-pink-100 rounded-full font-medium text-sm" data-category="kartoshka">Картошка</button>
@@ -285,7 +290,7 @@
                 name: 'Моти',
                 description: 'Нежные японские рисовые пирожные с начинкой',
                 price: 100,
-                image: 'https://images.unsplash.com/photo-1629637727847-6ad1a1b34a6d?w=400&h=300&fit=crop',
+                image: 'https://images.unsplash.com/photo-1629637727847-6d1a1b34a6d?w=400&h=300&fit=crop',
                 category: 'mochi',
                 rating: 4.8,
                 reviewCount: 120,
@@ -374,130 +379,16 @@
                 });
             });
 
-            setupSwipe(elements.categoryCarousel);
-            setupSwipe(elements.promoCarousel);
-            setupMouseDrag(elements.categoryCarousel);
-            setupMouseDrag(elements.promoCarousel);
-            setupWheelScroll(elements.categoryCarousel);
-            setupWheelScroll(elements.promoCarousel);
+            // Initialize scroll for carousels
+            [elements.categoryCarousel, elements.promoCarousel].forEach(carousel => {
+                carousel.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+                    carousel.scrollLeft += delta * 2.5;
+                });
+            });
+
             window.addEventListener('resize', debounce(renderProducts, 100));
-        }
-
-        // Enhanced Swipe Handler
-        function setupSwipe(element) {
-            let startX = 0, startY = 0, currentX = 0, isDragging = false, velocity = 0;
-            let lastTime = 0, lastX = 0;
-            let scrollTimeout;
-
-            element.addEventListener('touchstart', e => {
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-                isDragging = true;
-                lastX = startX;
-                lastTime = Date.now();
-                velocity = 0;
-                element.style.transition = 'none';
-                clearTimeout(scrollTimeout);
-            });
-
-            element.addEventListener('touchmove', e => {
-                if (!isDragging) return;
-                currentX = e.touches[0].clientX;
-                const currentY = e.touches[0].clientY;
-                const diffX = currentX - startX;
-                const diffY = currentY - startY;
-                if (Math.abs(diffY) > Math.abs(diffX) * 1.5) {
-                    isDragging = false;
-                    return;
-                }
-                e.preventDefault();
-                const currentTime = Date.now();
-                const timeDelta = currentTime - lastTime;
-                if (timeDelta > 0) {
-                    velocity = (currentX - lastX) / timeDelta;
-                }
-                element.scrollLeft -= currentX - lastX;
-                lastX = currentX;
-                lastTime = currentTime;
-                startX = currentX;
-            });
-
-            element.addEventListener('touchend', () => {
-                if (!isDragging) return;
-                isDragging = false;
-                element.style.transition = 'scroll-left 0.5s ease-out';
-                const flingDistance = velocity * 150; // Adjust for fling effect
-                let targetScroll = element.scrollLeft - flingDistance;
-                const maxScroll = element.scrollWidth - element.clientWidth;
-                targetScroll = Math.max(0, Math.min(targetScroll, maxScroll));
-                const snapPoint = Math.round(targetScroll / 100) * 100;
-                scrollTimeout = setTimeout(() => {
-                    element.scrollTo({ left: snapPoint, behavior: 'smooth' });
-                }, 50);
-            });
-        }
-
-        // Mouse Drag Handler
-        function setupMouseDrag(element) {
-            let isDragging = false, startX = 0, scrollLeft = 0;
-
-            element.addEventListener('mousedown', e => {
-                isDragging = true;
-                startX = e.pageX;
-                scrollLeft = element.scrollLeft;
-                element.style.transition = 'none';
-                element.style.cursor = 'grabbing';
-            });
-
-            element.addEventListener('mousemove', e => {
-                if (!isDragging) return;
-                e.preventDefault();
-                const x = e.pageX;
-                const walk = (x - startX) * 1.5;
-                element.scrollLeft = scrollLeft - walk;
-            });
-
-            element.addEventListener('mouseup', () => {
-                if (!isDragging) return;
-                isDragging = false;
-                element.style.transition = 'scroll-left 0.5s ease-out';
-                element.style.cursor = 'grab';
-                const snapPoint = Math.round(element.scrollLeft / 100) * 100;
-                element.scrollTo({ left: snapPoint, behavior: 'smooth' });
-            });
-
-            element.addEventListener('mouseleave', () => {
-                if (isDragging) {
-                    isDragging = false;
-                    element.style.transition = 'scroll-left 0.5s ease-out';
-                    element.style.cursor = 'grab';
-                    const snapPoint = Math.round(element.scrollLeft / 100) * 100;
-                    element.scrollTo({ left: snapPoint, behavior: 'smooth' });
-                }
-            });
-        }
-
-        // Improved Wheel Scroll Handler
-        function setupWheelScroll(element) {
-            let scrollTimeout;
-            element.addEventListener('wheel', e => {
-                e.preventDefault();
-                const delta = e.deltaY * 0.8; // Reduced sensitivity
-                element.scrollLeft += delta;
-                clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(() => {
-                    const snapPoint = Math.round(element.scrollLeft / 100) * 100;
-                    element.scrollTo({ left: snapPoint, behavior: 'smooth' });
-                }, 50);
-            }, { passive: false });
-
-            // Prevent default page scroll when over carousel
-            element.addEventListener('mouseenter', () => {
-                document.body.style.overflow = 'hidden';
-            });
-            element.addEventListener('mouseleave', () => {
-                document.body.style.overflow = '';
-            });
         }
 
         // Cart Functions
