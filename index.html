@@ -48,6 +48,24 @@
         .carousel::-webkit-scrollbar {
             display: none;
         }
+        .reviews-carousel {
+            display: flex;
+            overflow-x: auto;
+            white-space: nowrap;
+            scroll-behavior: smooth;
+            touch-action: pan-x;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .reviews-carousel::-webkit-scrollbar {
+            display: none;
+        }
+        .review-card {
+            scroll-snap-align: start;
+            flex: 0 0 280px;
+            margin-right: 12px;
+        }
         .cart-modal, .product-detail {
             height: 100dvh;
             max-height: 100dvh;
@@ -131,6 +149,9 @@
             .filling-image-container {
                 max-height: 120px;
             }
+            .review-card {
+                flex: 0 0 320px;
+            }
         }
         @media (min-width: 1024px) {
             .product-card {
@@ -172,23 +193,35 @@
 
         <!-- Categories -->
         <div id="category-carousel" class="carousel flex gap-3 mb-6">
-            <button class="category-pill px-4 py-2 bg-pink-100 text-pink-600 rounded-full font-medium text-sm active" data-category="bento">Бенто-торт</button>
+            <button class="category-pill px-4 py-2 bg-pink-100 text-pink-600 rounded-full font-medium text-sm active" data-category="all">Все</button>
+            <button class="category-pill px-4 py-2 bg-gray-100 hover:bg-pink-100 rounded-full font-medium text-sm" data-category="bento">Бенто-торт</button>
             <button class="category-pill px-4 py-2 bg-gray-100 hover:bg-pink-100 rounded-full font-medium text-sm" data-category="mochi">Моти</button>
             <button class="category-pill px-4 py-2 bg-gray-100 hover:bg-pink-100 rounded-full font-medium text-sm" data-category="kartoshka">Картошка</button>
             <button class="category-pill px-4 py-2 bg-gray-100 hover:bg-pink-100 rounded-full font-medium text-sm" data-category="truffles">Трюфели</button>
             <button class="category-pill px-4 py-2 bg-gray-100 hover:bg-pink-100 rounded-full font-medium text-sm" data-category="madeleine">Мадлен</button>
         </div>
 
-        <!-- Products -->
+        <!-- New Products -->
         <div class="flex items-center justify-between mb-4">
-            <h2 id="section-title" class="text-lg font-semibold">Сладости</h2>
-            <span id="products-count" class="text-sm text-gray-600">5 товаров</span>
+            <h2 class="text-lg font-semibold">Новинки</h2>
+            <span id="new-products-count" class="text-sm text-gray-600">0 товаров</span>
         </div>
-        <div id="no-products" class="hidden text-center py-8">
-            <p class="text-lg font-medium">Товары не найдены</p>
-            <p class="text-sm text-gray-600">Попробуйте другую категорию</p>
+        <div id="new-products-grid" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 mb-8"></div>
+
+        <!-- Top Products -->
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold">Топ-позиции</h2>
+            <span id="top-products-count" class="text-sm text-gray-600">0 товаров</span>
         </div>
-        <div id="products-grid" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"></div>
+        <div id="top-products-grid" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 mb-8"></div>
+
+        <!-- Reviews -->
+        <div class="mb-4">
+            <h2 class="text-lg font-semibold">Отзывы</h2>
+        </div>
+        <div id="reviews-carousel" class="reviews-carousel flex overflow-x-auto gap-3">
+            <!-- Reviews will be rendered here -->
+        </div>
     </main>
 
     <!-- Cart Modal -->
@@ -245,7 +278,7 @@
         // App State
         const appState = {
             currentView: 'main',
-            activeCategory: 'bento',
+            activeCategory: 'all',
             cart: [],
             selectedProduct: null,
             selectedSize: 'S',
@@ -340,6 +373,44 @@
             }
         ];
 
+        const reviews = [
+            {
+                id: 'r1',
+                name: 'Анна',
+                rating: 5,
+                text: 'Бенто-торт просто восхитительный! Очень нежный и вкусный, особенно с начинкой "Маковый лимон".',
+                date: '2025-07-20'
+            },
+            {
+                id: 'r2',
+                name: 'Михаил',
+                rating: 4.5,
+                text: 'Моти невероятно мягкие, заказывал для вечеринки, все гости были в восторге!',
+                date: '2025-07-18'
+            },
+            {
+                id: 'r3',
+                name: 'Екатерина',
+                rating: 4.8,
+                text: 'Трюфели — это любовь с первого укуса. Шоколад насыщенный, тают во рту!',
+                date: '2025-07-15'
+            },
+            {
+                id: 'r4',
+                name: 'Дмитрий',
+                rating: 4.7,
+                text: 'Картошка как из детства, очень вкусная и красиво оформлена.',
+                date: '2025-07-10'
+            },
+            {
+                id: 'r5',
+                name: 'Ольга',
+                rating: 4.9,
+                text: 'Мадлен идеально подходят к чаю, заказываю уже третий раз!',
+                date: '2025-07-05'
+            }
+        ];
+
         // DOM Elements
         const elements = {
             cartBtn: document.getElementById('cart-btn'),
@@ -347,10 +418,11 @@
             categories: document.querySelectorAll('.category-pill'),
             categoryCarousel: document.getElementById('category-carousel'),
             promoCarousel: document.getElementById('promo-carousel'),
-            productsGrid: document.getElementById('products-grid'),
-            noProducts: document.getElementById('no-products'),
-            sectionTitle: document.getElementById('section-title'),
-            productsCount: document.getElementById('products-count'),
+            newProductsGrid: document.getElementById('new-products-grid'),
+            topProductsGrid: document.getElementById('top-products-grid'),
+            newProductsCount: document.getElementById('new-products-count'),
+            topProductsCount: document.getElementById('top-products-count'),
+            reviewsCarousel: document.getElementById('reviews-carousel'),
             cartModal: document.getElementById('cart-modal'),
             cartBackBtn: document.getElementById('cart-back-btn'),
             cartCloseBtn: document.getElementById('cart-close-btn'),
@@ -380,7 +452,7 @@
             });
 
             // Initialize scroll for carousels
-            [elements.categoryCarousel, elements.promoCarousel].forEach(carousel => {
+            [elements.categoryCarousel, elements.promoCarousel, elements.reviewsCarousel].forEach(carousel => {
                 carousel.addEventListener('wheel', (e) => {
                     e.preventDefault();
                     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
@@ -389,6 +461,59 @@
             });
 
             window.addEventListener('resize', debounce(renderProducts, 100));
+
+            // Auto-scroll for reviews
+            startReviewsAutoScroll();
+        }
+
+        // Reviews Auto-Scroll
+        function startReviewsAutoScroll() {
+            const carousel = elements.reviewsCarousel;
+            if (!carousel) return;
+
+            let scrollPosition = 0;
+            const scrollSpeed = 1; // Pixels per frame
+            const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+
+            function autoScroll() {
+                scrollPosition += scrollSpeed;
+                if (scrollPosition >= maxScroll) {
+                    scrollPosition = 0; // Reset to start
+                    carousel.scrollTo({ left: 0, behavior: 'auto' });
+                } else {
+                    carousel.scrollTo({ left: scrollPosition, behavior: 'auto' });
+                }
+                requestAnimationFrame(autoScroll);
+            }
+
+            requestAnimationFrame(autoScroll);
+
+            // Pause auto-scroll on user interaction
+            let isUserInteracting = false;
+            carousel.addEventListener('touchstart', () => isUserInteracting = true);
+            carousel.addEventListener('touchend', () => {
+                setTimeout(() => isUserInteracting = false, 1000);
+            });
+            carousel.addEventListener('wheel', () => {
+                isUserInteracting = true;
+                setTimeout(() => isUserInteracting = false, 1000);
+            });
+
+            // Only auto-scroll when not interacting
+            function conditionalAutoScroll() {
+                if (!isUserInteracting) {
+                    scrollPosition += scrollSpeed;
+                    if (scrollPosition >= maxScroll) {
+                        scrollPosition = 0;
+                        carousel.scrollTo({ left: 0, behavior: 'auto' });
+                    } else {
+                        carousel.scrollTo({ left: scrollPosition, behavior: 'auto' });
+                    }
+                }
+                requestAnimationFrame(conditionalAutoScroll);
+            }
+
+            requestAnimationFrame(conditionalAutoScroll);
         }
 
         // Cart Functions
@@ -731,7 +856,7 @@
         // Product Functions
         function getFilteredProducts() {
             let filtered = products;
-            if (appState.activeCategory) {
+            if (appState.activeCategory && appState.activeCategory !== 'all') {
                 filtered = filtered.filter(product => product.category === appState.activeCategory);
             }
             return filtered;
@@ -739,66 +864,85 @@
 
         function renderProducts() {
             requestAnimationFrame(() => {
-                const filteredProducts = getFilteredProducts();
-                const categoryNames = {
-                    'bento': 'Бенто-торт',
-                    'mochi': 'Моти',
-                    'kartoshka': 'Картошка',
-                    'truffles': 'Трюфели',
-                    'madeleine': 'Мадлен'
-                };
-                elements.sectionTitle.textContent = categoryNames[appState.activeCategory] || 'Сладости';
-                elements.productsCount.textContent = `${filteredProducts.length} товаров`;
-                elements.productsGrid.classList.toggle('hidden', filteredProducts.length === 0);
-                elements.noProducts.classList.toggle('hidden', filteredProducts.length !== 0);
-                elements.productsGrid.innerHTML = filteredProducts.map(product => {
-                    const size = product.sizes ? product.sizes.find(s => s.size === 'S') : null;
-                    const price = size ? size.price : product.price;
-                    const discountedPrice = product.discount ? Math.round(price * (1 - product.discount / 100)) : price;
-                    return `
-                        <div class="product-card animate-fade-in bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer" onclick="openProductDetailById('${product.id}')">
-                            <div class="relative h-32 bg-gray-200">
-                                <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">
-                                ${product.discount ? `<div class="discount-badge">-${product.discount}%</div>` : ''}
-                                ${product.isNew ? '<div class="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">NEW</div>' : ''}
-                                <div class="rating-display absolute top-2 right-2 flex items-center gap-1">
-                                    <svg class="rating-star w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                // New Products
+                const newProducts = products.filter(product => product.isNew);
+                elements.newProductsCount.textContent = `${newProducts.length} товаров`;
+                elements.newProductsGrid.classList.toggle('hidden', newProducts.length === 0);
+                elements.newProductsGrid.innerHTML = newProducts.map(product => renderProductCard(product)).join('');
+
+                // Top Products
+                const topProducts = products.sort((a, b) => b.rating - a.rating).slice(0, 4);
+                elements.topProductsCount.textContent = `${topProducts.length} товаров`;
+                elements.topProductsGrid.classList.toggle('hidden', topProducts.length === 0);
+                elements.topProductsGrid.innerHTML = topProducts.map(product => renderProductCard(product)).join('');
+
+                // Reviews
+                elements.reviewsCarousel.innerHTML = reviews.map(review => `
+                    <div class="review-card animate-fade-in bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="flex items-center gap-1">
+                                ${Array(Math.round(review.rating)).fill().map(() => `
+                                    <svg class="rating-star w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                     </svg>
-                                    <span class="text-xs">${product.rating.toFixed(1)}</span>
-                                </div>
-                                <button onclick="addToCartById('${product.id}'); event.stopPropagation();" class="add-to-cart-btn absolute bottom-2 right-2 bg-white border border-gray-300 hover:bg-gray-100 p-2 rounded-full">
-                                    <svg class="icon w-5 h-5" viewBox="0 0 24 24">
-                                        <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                                    </svg>
-                                </button>
+                                `).join('')}
                             </div>
-                            <div class="p-3">
-                                <h3 class="font-semibold text-sm line-clamp-1 mb-1">${product.name}</h3>
-                                ${product.volume ? `<p class="text-xs text-gray-600">${size ? size.weight : product.volume}</p>` : ''}
-                                <p class="text-xs text-gray-600 line-clamp-2 mb-2">${product.description}</p>
-                                <div class="flex items-center gap-1 mb-2">
-                                    <svg class="rating-star w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                    </svg>
-                                    <span class="text-xs font-medium">${product.rating.toFixed(1)}</span>
-                                    <span class="text-xs text-gray-600">(${product.reviewCount})</span>
-                                </div>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex flex-col">
-                                        ${product.discount ? `
-                                            <span class="text-xs text-gray-600 line-through">${price} ₽</span>
-                                            <span class="font-bold text-sm text-pink-600">${discountedPrice} ₽</span>
-                                        ` : `
-                                            <span class="font-bold text-sm text-pink-600">${price} ₽</span>
-                                        `}
-                                    </div>
-                                </div>
+                            <span class="text-xs font-medium">${review.rating.toFixed(1)}</span>
+                        </div>
+                        <h4 class="font-semibold text-sm">${review.name}</h4>
+                        <p class="text-xs text-gray-600 line-clamp-3">${review.text}</p>
+                        <p class="text-xs text-gray-500 mt-1">${review.date}</p>
+                    </div>
+                `).join('');
+            });
+        }
+
+        function renderProductCard(product) {
+            const size = product.sizes ? product.sizes.find(s => s.size === 'S') : null;
+            const price = size ? size.price : product.price;
+            const discountedPrice = product.discount ? Math.round(price * (1 - product.discount / 100)) : price;
+            return `
+                <div class="product-card animate-fade-in bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer" onclick="openProductDetailById('${product.id}')">
+                    <div class="relative h-32 bg-gray-200">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">
+                        ${product.discount ? `<div class="discount-badge">-${product.discount}%</div>` : ''}
+                        ${product.isNew ? '<div class="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">NEW</div>' : ''}
+                        <div class="rating-display absolute top-2 right-2 flex items-center gap-1">
+                            <svg class="rating-star w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            <span class="text-xs">${product.rating.toFixed(1)}</span>
+                        </div>
+                        <button onclick="addToCartById('${product.id}'); event.stopPropagation();" class="add-to-cart-btn absolute bottom-2 right-2 bg-white border border-gray-300 hover:bg-gray-100 p-2 rounded-full">
+                            <svg class="icon w-5 h-5" viewBox="0 0 24 24">
+                                <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-semibold text-sm line-clamp-1 mb-1">${product.name}</h3>
+                        ${product.volume ? `<p class="text-xs text-gray-600">${size ? size.weight : product.volume}</p>` : ''}
+                        <p class="text-xs text-gray-600 line-clamp-2 mb-2">${product.description}</p>
+                        <div class="flex items-center gap-1 mb-2">
+                            <svg class="rating-star w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            <span class="text-xs font-medium">${product.rating.toFixed(1)}</span>
+                            <span class="text-xs text-gray-600">(${product.reviewCount})</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex flex-col">
+                                ${product.discount ? `
+                                    <span class="text-xs text-gray-600 line-through">${price} ₽</span>
+                                    <span class="font-bold text-sm text-pink-600">${discountedPrice} ₽</span>
+                                ` : `
+                                    <span class="font-bold text-sm text-pink-600">${price} ₽</span>
+                                `}
                             </div>
                         </div>
-                    `;
-                }).join('');
-            });
+                    </div>
+                </div>
+            `;
         }
 
         // Utility Functions
