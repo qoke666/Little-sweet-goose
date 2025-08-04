@@ -66,7 +66,7 @@
             flex: 0 0 280px;
             margin-right: 12px;
         }
-        .cart-modal, .product-detail {
+        .cart-modal, .product-detail, .rating-modal {
             height: 100dvh;
             max-height: 100dvh;
             overflow-y: auto;
@@ -138,6 +138,16 @@
             overflow: hidden;
             display: flex;
             justify-content: center;
+        }
+        .star-rating button {
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #e5e7eb;
+        }
+        .star-rating button.active {
+            color: #facc15;
         }
         @media (min-width: 768px) {
             .product-card {
@@ -263,7 +273,103 @@
                     </svg>
                 </button>
             </div>
-            <div id="detail-content" class="flex-1 overflow-auto p-4"></div>
+            <div id="detail-content" class="flex-1 overflow-auto p-4">
+                <div class="relative h-64 bg-gray-200 mb-4">
+                    <img src="" alt="" class="w-full h-full object-cover rounded-lg">
+                </div>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-1">
+                            <svg class="rating-star w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            <span class="font-semibold text-sm"></span>
+                        </div>
+                        <span class="text-gray-600 text-xs"></span>
+                    </div>
+                    <h1 class="text-lg font-bold"></h1>
+                    <div class="space-y-2">
+                        <button class="flex items-center justify-between w-full py-2 text-left" onclick="toggleIngredients()">
+                            <span class="font-semibold text-sm">Состав</span>
+                            <svg id="ingredients-chevron" class="icon w-5 h-5 transition-transform" viewBox="0 0 24 24">
+                                <path d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div id="ingredients-list" class="space-y-1 hidden animate-fade-in">
+                            ${appState.selectedProduct?.ingredients ? appState.selectedProduct.ingredients.map(ing => `
+                                <div class="text-xs text-gray-600">• ${ing}</div>
+                            `).join('') : '<div class="text-xs text-gray-600">Состав отсутствует</div>'}
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="quantity-controls flex items-center gap-2">
+                            <button class="quantity-btn p-1 bg-gray-100 rounded" onclick="updateDetailQuantity(-1)">
+                                <svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M20 12H4"/>
+                                </svg>
+                            </button>
+                            <span id="detail-quantity" class="w-8 text-center font-medium">1</span>
+                            <button class="quantity-btn p-1 bg-gray-100 rounded" onclick="updateDetailQuantity(1)">
+                                <svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <button onclick="addToCartById(appState.selectedProduct.id)" class="add-to-cart-btn flex-1 h-12 bg-pink-600 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
+                            <svg class="icon w-5 h-5" viewBox="0 0 24 24">
+                                <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            Добавить в корзину
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rating Modal -->
+    <div id="rating-modal" class="fixed inset-0 bg-white z-50 transform translate-y-full transition-transform">
+        <div class="flex flex-col h-full">
+            <div class="flex items-center justify-between p-4 border-b bg-white">
+                <button id="rating-back-btn">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <h2 class="text-lg font-semibold">Оставить отзыв</h2>
+                <button id="rating-close-btn">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="rating-content" class="flex-1 overflow-auto p-4">
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="text-sm font-semibold">Качество продукции</h3>
+                        <div class="star-rating flex gap-1" data-type="quality">
+                            <button>★</button><button>★</button><button>★</button><button>★</button><button>★</button>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold">Обслуживание</h3>
+                        <div class="star-rating flex gap-1" data-type="service">
+                            <button>★</button><button>★</button><button>★</button><button>★</button><button>★</button>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold">Доставка</h3>
+                        <div class="star-rating flex gap-1" data-type="delivery">
+                            <button>★</button><button>★</button><button>★</button><button>★</button><button>★</button>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold">Комментарий</h3>
+                        <textarea id="rating-comment" class="input-field border rounded-lg p-2 text-sm w-full" rows="4" placeholder="Ваши впечатления..."></textarea>
+                    </div>
+                    <button id="submit-rating" class="btn-primary w-full h-12 bg-pink-600 text-white rounded-lg text-sm font-semibold">Отправить отзыв</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -279,10 +385,12 @@
         const appState = {
             currentView: 'main',
             activeCategory: 'all',
-            cart: [],
+            cart: JSON.parse(localStorage.getItem('cart') || '[]'),
             selectedProduct: null,
             selectedSize: 'S',
-            selectedFilling: null
+            selectedFilling: null,
+            ratings: { quality: 0, service: 0, delivery: 0 },
+            orderId: null
         };
 
         // Mock Data
@@ -431,8 +539,16 @@
             productDetail: document.getElementById('product-detail'),
             detailBackBtn: document.getElementById('detail-back-btn'),
             detailTitle: document.getElementById('detail-title'),
-            detailContent: document.getElementById('detail-content')
+            detailContent: document.getElementById('detail-content'),
+            ratingModal: document.getElementById('rating-modal'),
+            ratingBackBtn: document.getElementById('rating-back-btn'),
+            ratingCloseBtn: document.getElementById('rating-close-btn'),
+            ratingContent: document.getElementById('rating-content'),
+            submitRatingBtn: document.getElementById('submit-rating')
         };
+
+        // Initialize quantity for product detail
+        let detailQuantity = 1;
 
         // Event Listeners
         function initEventListeners() {
@@ -440,6 +556,10 @@
             elements.cartBackBtn.addEventListener('click', closeCart);
             elements.cartCloseBtn.addEventListener('click', closeCart);
             elements.detailBackBtn.addEventListener('click', closeProductDetail);
+            elements.detailCloseBtn.addEventListener('click', closeProductDetail);
+            elements.ratingBackBtn.addEventListener('click', closeRatingModal);
+            elements.ratingCloseBtn.addEventListener('click', closeRatingModal);
+            elements.submitRatingBtn.addEventListener('click', submitRating);
 
             elements.categories.forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -451,7 +571,18 @@
                 });
             });
 
-            // Initialize scroll for carousels
+            document.querySelectorAll('.star-rating').forEach(ratingDiv => {
+                const type = ratingDiv.dataset.type;
+                ratingDiv.querySelectorAll('button').forEach((star, index) => {
+                    star.addEventListener('click', () => {
+                        appState.ratings[type] = index + 1;
+                        ratingDiv.querySelectorAll('button').forEach((s, i) => {
+                            s.classList.toggle('active', i < index + 1);
+                        });
+                    });
+                });
+            });
+
             [elements.categoryCarousel, elements.promoCarousel, elements.reviewsCarousel].forEach(carousel => {
                 carousel.addEventListener('wheel', (e) => {
                     e.preventDefault();
@@ -461,9 +592,75 @@
             });
 
             window.addEventListener('resize', debounce(renderProducts, 100));
-
-            // Auto-scroll for reviews
             startReviewsAutoScroll();
+            checkRatingMode();
+        }
+
+        // Check if opened in rating mode
+        function checkRatingMode() {
+            const hash = window.location.hash;
+            if (hash === '#rating') {
+                const urlParams = new URLSearchParams(window.location.search);
+                const orderId = urlParams.get('order_id');
+                if (orderId) {
+                    appState.orderId = orderId;
+                    openRatingModal();
+                }
+            }
+        }
+
+        // Rating Modal Functions
+        function openRatingModal() {
+            elements.ratingModal.classList.add('open');
+            elements.ratingModal.style.transform = 'translateY(0)';
+        }
+
+        function closeRatingModal() {
+            elements.ratingModal.classList.remove('open');
+            elements.ratingModal.style.transform = 'translateY(100%)';
+            appState.ratings = { quality: 0, service: 0, delivery: 0 };
+            document.querySelectorAll('.star-rating button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('rating-comment').value = '';
+        }
+
+        function submitRating() {
+            const comment = document.getElementById('rating-comment').value;
+            const telegram = window.Telegram?.WebApp;
+            const user = telegram?.initDataUnsafe?.user || {};
+
+            const ratingData = {
+                event: 'submit_rating',
+                order_id: appState.orderId || 'unknown',
+                user_id: String(user.id || 'unknown'),
+                username: user.username || '',
+                first_name: user.first_name || '',
+                last_name: user.last_name || '',
+                timestamp: new Date().toISOString(),
+                url: window.location.href,
+                userAgent: navigator.userAgent,
+                rating: {
+                    quality: appState.ratings.quality,
+                    service: appState.ratings.service,
+                    delivery: appState.ratings.delivery,
+                    comment: comment
+                }
+            };
+
+            fetch('https://script.google.com/macros/s/AKfycbxRK9cnnKCBM4AypS_cPFlYWkowUfBRiwFHbHYBcWNREHuy25nx1JvUVatPtVk1BzU_Mw/exec', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(ratingData),
+                mode: 'no-cors'
+            })
+                .then(() => {
+                    showNotification('Отзыв отправлен! Спасибо!', 'success');
+                    closeRatingModal();
+                    window.location.hash = '';
+                })
+                .catch(error => {
+                    console.error('Error submitting rating:', error);
+                    showNotification('Ошибка при отправке отзыва', 'error');
+                });
         }
 
         // Reviews Auto-Scroll
@@ -472,13 +669,13 @@
             if (!carousel) return;
 
             let scrollPosition = 0;
-            const scrollSpeed = 1; // Pixels per frame
+            const scrollSpeed = 1;
             const maxScroll = carousel.scrollWidth - carousel.clientWidth;
 
             function autoScroll() {
                 scrollPosition += scrollSpeed;
                 if (scrollPosition >= maxScroll) {
-                    scrollPosition = 0; // Reset to start
+                    scrollPosition = 0;
                     carousel.scrollTo({ left: 0, behavior: 'auto' });
                 } else {
                     carousel.scrollTo({ left: scrollPosition, behavior: 'auto' });
@@ -488,7 +685,6 @@
 
             requestAnimationFrame(autoScroll);
 
-            // Pause auto-scroll on user interaction
             let isUserInteracting = false;
             carousel.addEventListener('touchstart', () => isUserInteracting = true);
             carousel.addEventListener('touchend', () => {
@@ -499,7 +695,6 @@
                 setTimeout(() => isUserInteracting = false, 1000);
             });
 
-            // Only auto-scroll when not interacting
             function conditionalAutoScroll() {
                 if (!isUserInteracting) {
                     scrollPosition += scrollSpeed;
@@ -528,7 +723,7 @@
             elements.cartModal.style.transform = 'translateY(100%)';
         }
 
-        function addToCartById(productId, quantity = 1) {
+        function addToCartById(productId, quantity = detailQuantity) {
             const product = products.find(p => p.id === productId);
             if (!product) {
                 showNotification('Продукт не найден', 'error');
@@ -735,6 +930,7 @@
             elements.detailTitle.textContent = product.name;
             elements.productDetail.classList.add('open');
             elements.productDetail.style.transform = 'translateY(0)';
+            detailQuantity = 1;
             renderProductDetail();
         }
 
@@ -755,6 +951,18 @@
         function selectFilling(filling) {
             appState.selectedFilling = filling;
             renderProductDetail();
+        }
+
+        function updateDetailQuantity(change) {
+            detailQuantity = Math.max(1, detailQuantity + change);
+            document.getElementById('detail-quantity').textContent = detailQuantity;
+        }
+
+        function toggleIngredients() {
+            const list = document.getElementById('ingredients-list');
+            const chevron = document.getElementById('ingredients-chevron');
+            list.classList.toggle('hidden');
+            chevron.classList.toggle('rotate-180');
         }
 
         function renderProductDetail() {
@@ -831,128 +1039,203 @@
                             `).join('') : '<div class="text-xs text-gray-600">Состав отсутствует</div>'}
                         </div>
                     </div>
-                    <div class="space-y-3 pt-3">
-                        <div class="flex items-center justify-center gap-4">
-                            <button class="quantity-btn p-1 bg-gray-100 rounded" onclick="changeDetailQuantity(-1)">
-                                <svg class="icon w-5 h-5" viewBox="0 0 24 24">
+                    <div class="flex items-center gap-3">
+                        <div class="quantity-controls flex items-center gap-2">
+                            <button class="quantity-btn p-1 bg-gray-100 rounded" onclick="updateDetailQuantity(-1)">
+                                <svg class="icon" viewBox="0 0 24 24">
                                     <path d="M20 12H4"/>
                                 </svg>
                             </button>
-                            <span id="detail-quantity" class="font-semibold text-lg">1</span>
-                            <button class="quantity-btn p-1 bg-gray-100 rounded" onclick="changeDetailQuantity(1)">
-                                <svg class="icon w-5 h-5" viewBox="0 0 24 24">
+                            <span id="detail-quantity" class="w-8 text-center font-medium">${detailQuantity}</span>
+                            <button class="quantity-btn p-1 bg-gray-100 rounded" onclick="updateDetailQuantity(1)">
+                                <svg class="icon" viewBox="0 0 24 24">
                                     <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                                 </svg>
                             </button>
                         </div>
-                        <button onclick="addToCartFromDetail()" class="btn-primary w-full h-12 bg-pink-600 text-white rounded-lg text-sm font-semibold">
-                            Добавить <span id="detail-total-price">${discountedPrice}</span> ₽
+                        <button onclick="addToCartById(appState.selectedProduct.id)" class="add-to-cart-btn flex-1 h-12 bg-pink-600 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
+                            <svg class="icon w-5 h-5" viewBox="0 0 24 24">
+                                <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            Добавить в корзину
                         </button>
                     </div>
                 </div>
             `;
         }
 
-        // Product Functions
-        function getFilteredProducts() {
-            let filtered = products;
-            if (appState.activeCategory && appState.activeCategory !== 'all') {
-                filtered = filtered.filter(product => product.category === appState.activeCategory);
-            }
-            return filtered;
-        }
-
+        // Product Rendering
         function renderProducts() {
-            requestAnimationFrame(() => {
-                // New Products
-                const newProducts = products.filter(product => product.isNew);
-                elements.newProductsCount.textContent = `${newProducts.length} товаров`;
-                elements.newProductsGrid.classList.toggle('hidden', newProducts.length === 0);
-                elements.newProductsGrid.innerHTML = newProducts.map(product => renderProductCard(product)).join('');
+            const filteredProducts = appState.activeCategory === 'all'
+                ? products
+                : products.filter(p => p.category === appState.activeCategory);
 
-                // Top Products
-                const topProducts = products.sort((a, b) => b.rating - a.rating).slice(0, 4);
-                elements.topProductsCount.textContent = `${topProducts.length} товаров`;
-                elements.topProductsGrid.classList.toggle('hidden', topProducts.length === 0);
-                elements.topProductsGrid.innerHTML = topProducts.map(product => renderProductCard(product)).join('');
+            const newProducts = filteredProducts.filter(p => p.isNew);
+            const topProducts = filteredProducts.sort((a, b) => b.rating - a.rating).slice(0, 4);
 
-                // Reviews
-                elements.reviewsCarousel.innerHTML = reviews.map(review => `
-                    <div class="review-card animate-fade-in bg-white rounded-lg shadow-sm p-4">
-                        <div class="flex items-center gap-2 mb-2">
-                            <div class="flex items-center gap-1">
-                                ${Array(Math.round(review.rating)).fill().map(() => `
-                                    <svg class="rating-star w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                    </svg>
-                                `).join('')}
-                            </div>
-                            <span class="text-xs font-medium">${review.rating.toFixed(1)}</span>
-                        </div>
-                        <h4 class="font-semibold text-sm">${review.name}</h4>
-                        <p class="text-xs text-gray-600 line-clamp-3">${review.text}</p>
-                        <p class="text-xs text-gray-500 mt-1">${review.date}</p>
-                    </div>
-                `).join('');
-            });
-        }
+            elements.newProductsCount.textContent = `${newProducts.length} товаров`;
+            elements.topProductsCount.textContent = `${topProducts.length} товаров`;
 
-        function renderProductCard(product) {
-            const size = product.sizes ? product.sizes.find(s => s.size === 'S') : null;
-            const price = size ? size.price : product.price;
-            const discountedPrice = product.discount ? Math.round(price * (1 - product.discount / 100)) : price;
-            return `
-                <div class="product-card animate-fade-in bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer" onclick="openProductDetailById('${product.id}')">
-                    <div class="relative h-32 bg-gray-200">
+            elements.newProductsGrid.innerHTML = newProducts.map(product => `
+                <div class="product-card animate-zoom-in relative cursor-pointer rounded-lg overflow-hidden bg-white shadow-sm" onclick="openProductDetailById('${product.id}')">
+                    <div class="relative h-40 bg-gray-200">
                         <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">
-                        ${product.discount ? `<div class="discount-badge">-${product.discount}%</div>` : ''}
-                        ${product.isNew ? '<div class="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">NEW</div>' : ''}
-                        <div class="rating-display absolute top-2 right-2 flex items-center gap-1">
-                            <svg class="rating-star w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                            </svg>
-                            <span class="text-xs">${product.rating.toFixed(1)}</span>
-                        </div>
-                        <button onclick="addToCartById('${product.id}'); event.stopPropagation();" class="add-to-cart-btn absolute bottom-2 right-2 bg-white border border-gray-300 hover:bg-gray-100 p-2 rounded-full">
-                            <svg class="icon w-5 h-5" viewBox="0 0 24 24">
-                                <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                            </svg>
-                        </button>
+                        ${product.discount ? `<div class="discount-badge">Скидка -${product.discount}%</div>` : ''}
+                        ${product.volume ? `
+                            <div class="absolute top-2 right-2 bg-white/90 rounded-lg px-2 py-1 border">
+                                <span class="text-xs font-medium">${product.sizes ? product.sizes[0].weight : product.volume}</span>
+                            </div>
+                        ` : ''}
                     </div>
                     <div class="p-3">
-                        <h3 class="font-semibold text-sm line-clamp-1 mb-1">${product.name}</h3>
-                        ${product.volume ? `<p class="text-xs text-gray-600">${size ? size.weight : product.volume}</p>` : ''}
-                        <p class="text-xs text-gray-600 line-clamp-2 mb-2">${product.description}</p>
-                        <div class="flex items-center gap-1 mb-2">
-                            <svg class="rating-star w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                            </svg>
-                            <span class="text-xs font-medium">${product.rating.toFixed(1)}</span>
-                            <span class="text-xs text-gray-600">(${product.reviewCount})</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex flex-col">
-                                ${product.discount ? `
-                                    <span class="text-xs text-gray-600 line-through">${price} ₽</span>
-                                    <span class="font-bold text-sm text-pink-600">${discountedPrice} ₽</span>
-                                ` : `
-                                    <span class="font-bold text-sm text-pink-600">${price} ₽</span>
-                                `}
+                        <h3 class="text-sm font-semibold line-clamp-1">${product.name}</h3>
+                        <p class="text-xs text-gray-600 line-clamp-2">${product.description}</p>
+                        <div class="flex items-center justify-between mt-2">
+                            <div class="flex items-center gap-1">
+                                <svg class="rating-star w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                                <span class="font-semibold text-sm">${product.rating}</span>
                             </div>
+                            <p class="text-sm font-semibold text-pink-600">${product.sizes ? product.sizes[0].price : product.price} ₽</p>
                         </div>
                     </div>
                 </div>
-            `;
+            `).join('');
+
+            elements.topProductsGrid.innerHTML = topProducts.map(product => `
+                <div class="product-card animate-zoom-in relative cursor-pointer rounded-lg overflow-hidden bg-white shadow-sm" onclick="openProductDetailById('${product.id}')">
+                    <div class="relative h-40 bg-gray-200">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">
+                        ${product.discount ? `<div class="discount-badge">Скидка -${product.discount}%</div>` : ''}
+                        ${product.volume ? `
+                            <div class="absolute top-2 right-2 bg-white/90 rounded-lg px-2 py-1 border">
+                                <span class="text-xs font-medium">${product.sizes ? product.sizes[0].weight : product.volume}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="p-3">
+                        <h3 class="text-sm font-semibold line-clamp-1">${product.name}</h3>
+                        <p class="text-xs text-gray-600 line-clamp-2">${product.description}</p>
+                        <div class="flex items-center justify-between mt-2">
+                            <div class="flex items-center gap-1">
+                                <svg class="rating-star w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                                <span class="font-semibold text-sm">${product.rating}</span>
+                            </div>
+                            <p class="text-sm font-semibold text-pink-600">${product.sizes ? product.sizes[0].price : product.price} ₽</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            elements.reviewsCarousel.innerHTML = reviews.map(review => `
+                <div class="review-card bg-white p-4 rounded-lg shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-semibold text-sm">${review.name}</h3>
+                        <div class="flex items-center gap-1">
+                            <svg class="rating-star w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            <span class="font-semibold text-sm">${review.rating}</span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600 line-clamp-3">${review.text}</p>
+                    <p class="text-xs text-gray-500 mt-2">${review.date}</p>
+                </div>
+            `).join('');
+        }
+
+        // Checkout
+        function checkout() {
+            if (!appState.cart.length) {
+                showNotification('Корзина пуста', 'error');
+                return;
+            }
+
+            const dateInput = document.querySelector('input[type="date"]');
+            const timeInput = document.querySelector('input[type="time"]');
+            const addressInput = document.querySelector('input[data-address]');
+            const phoneInput = document.querySelector('input[type="tel"]');
+
+            if (!dateInput.value || !timeInput.value || !addressInput.value || !phoneInput.value) {
+                showNotification('Заполните все поля', 'error');
+                return;
+            }
+
+            const totalAmount = appState.cart.reduce((sum, item) => {
+                const product = products.find(p => p.id === item.id);
+                const size = product.sizes ? product.sizes.find(s => s.size === item.selectedSize) : null;
+                return sum + (size ? size.price : item.price) * item.quantity;
+            }, 0);
+            const deliveryFee = totalAmount >= 2000 ? 0 : 300;
+            const finalAmount = totalAmount + deliveryFee;
+
+            const telegram = window.Telegram?.WebApp;
+            const user = telegram?.initDataUnsafe?.user || {};
+
+            const orderData = {
+                event: 'order_submit',
+                user_id: String(user.id || 'unknown'),
+                username: user.username || '',
+                first_name: user.first_name || '',
+                last_name: user.last_name || '',
+                timestamp: new Date().toISOString(),
+                url: window.location.href,
+                userAgent: navigator.userAgent,
+                additional: {
+                    order_id: 'ORD-' + Date.now(),
+                    order_details: appState.cart.map(item => {
+                        const product = products.find(p => p.id === item.id);
+                        const size = product.sizes ? product.sizes.find(s => s.size === item.selectedSize) : null;
+                        return {
+                            name: product.name,
+                            size: item.selectedSize,
+                            filling: item.selectedFilling,
+                            quantity: item.quantity,
+                            price: size ? size.price : item.price
+                        };
+                    }),
+                    total_amount: totalAmount,
+                    delivery_fee: deliveryFee,
+                    final_amount: finalAmount,
+                    date: dateInput.value,
+                    time: timeInput.value,
+                    address: addressInput.value,
+                    phone: phoneInput.value
+                }
+            };
+
+            fetch('https://script.google.com/macros/s/AKfycbxRK9cnnKCBM4AypS_cPFlYWkowUfBRiwFHbHYBcWNREHuy25nx1JvUVatPtVk1BzU_Mw/exec', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData),
+                mode: 'no-cors'
+            })
+                .then(() => {
+                    clearCart();
+                    showNotification('Заказ успешно отправлен! Мы свяжемся с вами.', 'success');
+                    closeCart();
+                })
+                .catch(error => {
+                    console.error('Error submitting order:', error);
+                    showNotification('Ошибка при отправке заказа', 'error');
+                });
         }
 
         // Utility Functions
         function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
-            notification.classList.add('fixed', 'bottom-4', 'left-1/2', 'transform', '-translate-x-1/2', 'z-50', 'px-4', 'py-2', 'rounded-lg', 'text-white', 'text-sm', 'font-medium', 'animate-zoom-in');
-            notification.classList.add(type === 'success' ? 'bg-green-500' : 'bg-red-500');
+            notification.className = `fixed top-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-lg text-sm font-medium animate-zoom-in ${
+                type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+            }`;
             notification.textContent = message;
             document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 3000);
+            setTimeout(() => {
+                notification.classList.add('opacity-0');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
         }
 
         function debounce(func, wait) {
@@ -967,144 +1250,12 @@
             };
         }
 
-        function checkout() {
-            const dateInput = document.querySelector('input[type="date"]');
-            const timeInput = document.querySelector('input[type="time"]');
-            const addressInput = document.querySelector('input[data-address]');
-            const phoneInput = document.querySelector('input[type="tel"]');
-
-            if (!dateInput.value || !timeInput.value || !addressInput.value || !phoneInput.value) {
-                showNotification('Заполните все поля', 'error');
-                return;
-            }
-
-            const phoneRegex = /^\+?\d{10,12}$/;
-            if (!phoneRegex.test(phoneInput.value)) {
-                showNotification('Некорректный номер телефона', 'error');
-                return;
-            }
-
-            if (!Array.isArray(appState.cart)) {
-                console.error('appState.cart is not an array:', appState.cart);
-                showNotification('Ошибка корзины: данные повреждены', 'error');
-                appState.cart = [];
-                localStorage.setItem('cart', JSON.stringify(appState.cart));
-                renderCart();
-                return;
-            }
-
-            if (appState.cart.length === 0) {
-                showNotification('Корзина пуста', 'error');
-                return;
-            }
-
-            const totalAmount = appState.cart.reduce((sum, item) => {
-                const product = products.find(p => p.id === item.id);
-                const size = product.sizes ? product.sizes.find(s => s.size === item.selectedSize) : null;
-                return sum + (size ? size.price : item.price) * item.quantity;
-            }, 0);
-            const deliveryFee = totalAmount >= 2000 ? 0 : 300;
-            const finalAmount = totalAmount + deliveryFee;
-
-            const telegram = window.Telegram?.WebApp;
-            const user = telegram?.initDataUnsafe?.user || {};
-            const orderData = {
-                event: 'order_submit',
-                user_id: user.id || 'unknown',
-                username: user.username || '',
-                first_name: user.first_name || '',
-                last_name: user.last_name || '',
-                timestamp: new Date().toISOString(),
-                url: window.location.href,
-                userAgent: navigator.userAgent,
-                additional: {
-                    order_id: `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                    order_details: appState.cart.map(item => ({
-                        id: item.id,
-                        name: item.name,
-                        price: products.find(p => p.id === item.id).sizes ? products.find(p => p.id === item.id).sizes.find(s => s.size === item.selectedSize).price : item.price,
-                        quantity: item.quantity,
-                        size: item.selectedSize,
-                        filling: item.selectedFilling || null
-                    })),
-                    total_amount: totalAmount,
-                    delivery_fee: deliveryFee,
-                    final_amount: finalAmount,
-                    date: dateInput.value,
-                    time: timeInput.value,
-                    address: addressInput.value,
-                    phone: phoneInput.value
-                }
-            };
-
-            fetch('https://script.google.com/macros/s/AKfycb6xRK9c-nnKCBM4AypS_cP4FlYWkowU4fBRiwFHbHYBcWNREHuy25nx1JvUVatPtVk1BzU_Mw/exec', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(orderData),
-                mode: 'no-cors'
-            })
-                .then(() => {
-                    showNotification('Заказ оформлен! Мы свяжемся с вами скоро.', 'success');
-                    clearCart();
-                    closeCart();
-                })
-                .catch(error => {
-                    console.error('Error sending order:', error);
-                    showNotification('Ошибка при отправке заказа', 'error');
-                });
-        }
-
-        // Detail Page Functions
-        let detailQuantity = 1;
-
-        function changeDetailQuantity(change) {
-            detailQuantity = Math.max(1, detailQuantity + change);
-            document.getElementById('detail-quantity').textContent = detailQuantity;
-            if (appState.selectedProduct) {
-                const size = appState.selectedProduct.sizes ? appState.selectedProduct.sizes.find(s => s.size === appState.selectedSize) : null;
-                const price = size ? size.price : appState.selectedProduct.price;
-                const discountedPrice = appState.selectedProduct.discount ? Math.round(price * (1 - appState.selectedProduct.discount / 100)) : price;
-                document.getElementById('detail-total-price').textContent = discountedPrice * detailQuantity;
-            }
-        }
-
-        function addToCartFromDetail() {
-            if (appState.selectedProduct) {
-                addToCartById(appState.selectedProduct.id, detailQuantity);
-                closeProductDetail();
-            }
-        }
-
-        function toggleIngredients() {
-            const list = document.getElementById('ingredients-list');
-            const chevron = document.getElementById('ingredients-chevron');
-            list.classList.toggle('hidden');
-            chevron.classList.toggle('rotate-180');
-        }
-
-        // Initialize App
-        function init() {
-            const savedCart = localStorage.getItem('cart');
-            if (savedCart) {
-                try {
-                    const parsedCart = JSON.parse(savedCart);
-                    if (Array.isArray(parsedCart)) {
-                        appState.cart = parsedCart;
-                    } else {
-                        console.error('Invalid cart data in localStorage:', parsedCart);
-                        localStorage.setItem('cart', JSON.stringify([]));
-                    }
-                } catch (error) {
-                    console.error('Error parsing cart from localStorage:', error);
-                    localStorage.setItem('cart', JSON.stringify([]));
-                }
-            }
-            initEventListeners();
-            renderProducts();
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
             updateCartBadge();
-        }
-
-        document.addEventListener('DOMContentLoaded', init);
+            renderProducts();
+            initEventListeners();
+        });
     </script>
 </body>
 </html>
