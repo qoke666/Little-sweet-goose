@@ -123,7 +123,6 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background-color: #ffffff;
             transition: background-color 0.2s, transform 0.2s;
         }
         .social-links a:hover {
@@ -248,11 +247,20 @@
         </div>
 
         <!-- Promo Carousel -->
-        <div id="promo-carousel" class="carousel flex overflow-x-auto gap-4 mb-8">
-            <div class="flex-shrink-0 w-72 h-36 bg-gray-200 rounded-xl shadow-sm"></div>
-            <div class="flex-shrink-0 w-72 h-36 bg-gray-200 rounded-xl shadow-sm"></div>
-            <div class="flex-shrink-0 w-72 h-36 bg-gray-200 rounded-xl shadow-sm"></div>
-        </div>
+        <div class="carousel">
+            <a href="https://telegra.ph/SCAM-kejs-ot-AMERIOBET-hronologiya-prufy-i-dolg-na-90-000-03-18" target="_blank" class="active">
+              <img src="https://i.postimg.cc/bJqQWjv5/photo-2025-03-18-15-18-14.jpg" alt="скам" />
+            </a>
+            <a href="https://www.instagram.com/reel/DKHZPnYtjQD/?igsh=1234567890" target="_blank">
+              <img src="https://i.postimg.cc/Z57qjBRv/feat-mac.jpg" alt="мак" />
+            </a>
+            <div class="hot"></div>
+            <div class="carousel-dots">
+              <div class="dot active"></div>
+              <div class="dot"></div>
+              <div class="dot"></div>
+            </div>
+          </div>
 
         <!-- Categories -->
         <div id="category-carousel" class="carousel flex gap-3 mb-8">
@@ -278,11 +286,6 @@
         </div>
         <div id="top-products-grid" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 mb-10"></div>
 
-        <!-- Reviews -->
-        <div class="mb-5">
-            <h2 class="text-xl font-bold text-gray-800">Отзывы</h2>
-        </div>
-        <div id="reviews-carousel" class="reviews-carousel flex overflow-x-auto gap-4"></div>
     </main>
 
     <!-- Cart Modal -->
@@ -407,8 +410,6 @@
                 ],
                 image: 'https://images.unsplash.com/photo-1614707267537-b85aaf00c3b3?w=400&h=300&fit=crop',
                 category: 'bento',
-                rating: 4.7,
-                reviewCount: 85,
                 isNew: true,
                 discount: 10,
                 volume: '300 г',
@@ -423,8 +424,6 @@
                 price: 100,
                 image: 'https://images.unsplash.com/photo-1629637727847-6d1a1b34a6d?w=400&h=300&fit=crop',
                 category: 'mochi',
-                rating: 4.8,
-                reviewCount: 120,
                 isNew: false,
                 volume: '1 шт',
                 ingredients: ['Рисовая мука', 'Сливочная начинка', 'Фруктовое пюре']
@@ -436,8 +435,6 @@
                 price: 120,
                 image: 'https://images.unsplash.com/photo-1599785209779-3154b9b341c2?w=400&h=300&fit=crop',
                 category: 'kartoshka',
-                rating: 4.6,
-                reviewCount: 95,
                 isNew: false,
                 volume: '1 шт',
                 ingredients: ['Бисквит шоколадный', 'Какао', 'Сгущенное молоко', 'Масло сливочное']
@@ -449,8 +446,6 @@
                 price: 150,
                 image: 'https://images.unsplash.com/photo-1606092195730-6d7a61b784f8?w=400&h=300&fit=crop',
                 category: 'truffles',
-                rating: 4.9,
-                reviewCount: 150,
                 isNew: true,
                 discount: 5,
                 volume: '100 г',
@@ -463,49 +458,9 @@
                 price: 80,
                 image: 'https://images.unsplash.com/photo-1619982440547-4e58f3c3ebfa?w=400&h=300&fit=crop',
                 category: 'madeleine',
-                rating: 4.5,
-                reviewCount: 70,
                 isNew: false,
                 volume: '1 шт',
                 ingredients: ['Пшеничная мука', 'Яйца', 'Сливочное масло', 'Лимонная цедра']
-            }
-        ];
-
-        const reviews = [
-            {
-                id: 'r1',
-                name: 'Анна',
-                rating: 5,
-                text: 'Бенто-торт просто восхитительный! Очень нежный и вкусный, особенно с начинкой "Маковый лимон".',
-                date: '2025-07-20'
-            },
-            {
-                id: 'r2',
-                name: 'Михаил',
-                rating: 4.5,
-                text: 'Моти невероятно мягкие, заказывал для вечеринки, все гости были в восторге!',
-                date: '2025-07-18'
-            },
-            {
-                id: 'r3',
-                name: 'Екатерина',
-                rating: 4.8,
-                text: 'Трюфели — это любовь с первого укуса. Шоколад насыщенный, тают во рту!',
-                date: '2025-07-15'
-            },
-            {
-                id: 'r4',
-                name: 'Дмитрий',
-                rating: 4.7,
-                text: 'Картошка как из детства, очень вкусная и красиво оформлена.',
-                date: '2025-07-10'
-            },
-            {
-                id: 'r5',
-                name: 'Ольга',
-                rating: 4.9,
-                text: 'Мадлен идеально подходят к чаю, заказываю уже третий раз!',
-                date: '2025-07-05'
             }
         ];
 
@@ -515,12 +470,11 @@
             cartBadge: document.getElementById('cart-badge'),
             categories: document.querySelectorAll('.category-pill'),
             categoryCarousel: document.getElementById('category-carousel'),
-            promoCarousel: document.getElementById('promo-carousel'),
+            promoCarousel: document.querySelector('.carousel'),
             newProductsGrid: document.getElementById('new-products-grid'),
             topProductsGrid: document.getElementById('top-products-grid'),
             newProductsCount: document.getElementById('new-products-count'),
             topProductsCount: document.getElementById('top-products-count'),
-            reviewsCarousel: document.getElementById('reviews-carousel'),
             cartModal: document.getElementById('cart-modal'),
             cartBackBtn: document.getElementById('cart-back-btn'),
             cartCloseBtn: document.getElementById('cart-close-btn'),
@@ -570,6 +524,30 @@
                     }
                 });
             });
+            startCarousel();
+        }
+
+        function startCarousel() {
+            const slides = elements.promoCarousel.querySelectorAll('a');
+            const dots = elements.promoCarousel.querySelectorAll('.dot');
+            let currentIndex = 0;
+            function showSlide(index) {
+                slides.forEach((slide, i) => {
+                    slide.classList.toggle('active', i === index);
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === index);
+                });
+                currentIndex = index;
+            }
+
+            function nextSlide() {
+                currentIndex = (currentIndex + 1) % slides.length;
+                showSlide(currentIndex);
+            }
+
+            setInterval(nextSlide, 3000);
+            showSlide(currentIndex);
         }
 
         // Reviews Auto-Scroll
@@ -889,15 +867,6 @@
                     ` : ''}
                 </div>
                 <div class="space-y-4">
-                    <div class="flex items-center gap-2">
-                        <div class="flex items-center gap-1">
-                            <svg class="rating-star w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                            </svg>
-                            <span class="font-semibold text-base">${product.rating}</span>
-                        </div>
-                        <span class="text-gray-600 text-sm">${product.reviewCount} оценок</span>
-                    </div>
                     <h1 class="text-xl font-bold text-gray-800">${product.name}</h1>
                     ${product.sizes ? `
                         <div class="space-y-2">
@@ -987,24 +956,6 @@
                 elements.topProductsCount.textContent = `${topProducts.length} товаров`;
                 elements.topProductsGrid.classList.toggle('hidden', topProducts.length === 0);
                 elements.topProductsGrid.innerHTML = topProducts.map(product => renderProductCard(product)).join('');
-
-                elements.reviewsCarousel.innerHTML = reviews.map(review => `
-                    <div class="review-card animate-fade-in bg-white rounded-lg shadow-sm p-4">
-                        <div class="flex items-center gap-2 mb-2">
-                            <div class="flex items-center gap-1">
-                                ${Array(Math.round(review.rating)).fill().map(() => `
-                                    <svg class="rating-star w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                    </svg>
-                                `).join('')}
-                            </div>
-                            <span class="text-sm font-semibold">${review.rating.toFixed(1)}</span>
-                        </div>
-                        <h4 class="font-semibold text-base">${review.name}</h4>
-                        <p class="text-sm text-gray-600 line-clamp-3">${review.text}</p>
-                        <p class="text-xs text-gray-500 mt-1">${review.date}</p>
-                    </div>
-                `).join('');
             });
         }
 
@@ -1018,12 +969,6 @@
                         <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">
                         ${product.discount ? `<div class="discount-badge">-${product.discount}%</div>` : ''}
                         ${product.isNew ? '<div class="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">NEW</div>' : ''}
-                        <div class="rating-display absolute top-2 right-2 flex items-center gap-1">
-                            <svg class="rating-star w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                            </svg>
-                            <span class="text-xs">${product.rating.toFixed(1)}</span>
-                        </div>
                         <button onclick="addToCartById('${product.id}'); event.stopPropagation();" class="add-to-cart-btn absolute bottom-2 right-2 bg-white border border-gray-300 hover:bg-gray-100 p-2 rounded-full shadow-sm">
                             <svg class="icon w-5 h-5" viewBox="0 0 24 24">
                                 <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -1034,13 +979,6 @@
                         <h3 class="font-semibold text-base line-clamp-1 mb-1 text-gray-800">${product.name}</h3>
                         ${product.volume ? `<p class="text-sm text-gray-600">${size ? size.weight : product.volume}</p>` : ''}
                         <p class="text-sm text-gray-600 line-clamp-2 mb-2">${product.description}</p>
-                        <div class="flex items-center gap-1 mb-2">
-                            <svg class="rating-star w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                            </svg>
-                            <span class="text-sm font-semibold">${product.rating.toFixed(1)}</span>
-                            <span class="text-sm text-gray-600">(${product.reviewCount})</span>
-                        </div>
                         <div class="flex items-center justify-between">
                             <div class="flex flex-col">
                                 ${product.discount ? `
