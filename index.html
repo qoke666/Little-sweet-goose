@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Кондитерская</title>
+    <title>Little Sweet Goose</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -14,6 +15,15 @@
             padding: 0;
             -webkit-tap-highlight-color: transparent;
             background-color: #f3f4f6;
+            position: relative;
+        }
+        #tsparticles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
         }
         .animate-zoom-in {
             animation: zoomIn 0.3s ease forwards;
@@ -134,8 +144,6 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background-color: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         .size-btn.active {
             background-color: #fce7f3;
@@ -190,9 +198,32 @@
                 width: calc((100% - 4rem) / 4);
             }
         }
+        /* Floating pink particles */
+        .particle {
+            position: absolute;
+            background: rgba(255, 105, 180, 0.8); /* Pink with transparency */
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+            pointer-events: none;
+        }
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+                opacity: 0.8;
+            }
+            50% {
+                transform: translateY(-100px);
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 0.8;
+            }
+        }
     </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 relative">
+    <div id="tsparticles"></div>
     <!-- Main Content -->
     <main class="pt-24 pb-20 px-4 max-w-7xl mx-auto relative">
         <!-- Header Elements -->
@@ -205,7 +236,7 @@
                     <span id="cart-badge" class="absolute -top-1 -right-1 bg-pink-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
                 </button>
             </div>
-            <h1 class="text-xl font-bold text-gray-800">Кондитерская</h1>
+            <h1 class="text-xl font-bold text-gray-800">Little Sweet Goose</h1>
             <div class="social-links flex items-center gap-3">
                 <a href="https://t.me/limitedclubcpa" target="_blank" class="social-link tg-link" data-social="telegram">
                     <i class="fab fa-telegram-plane"></i>
@@ -297,7 +328,44 @@
         </div>
     </div>
 
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+        window.addEventListener('load', () => {
+            AOS.refresh();
+        });
+
+        if (typeof tsParticles !== 'undefined') {
+            tsParticles.load("tsparticles", {
+                fpsLimit: 60,
+                particles: {
+                    number: { value: 200, density: { enable: true, value_area: 800 } },
+                    color: { value: "#FF69B4" },
+                    shape: { type: "circle" },
+                    opacity: { value: 0.5, random: true },
+                    size: { value: 2, random: { enable: true, minimumValue: 0.5 } },
+                    links: { enable: false },
+                    move: {
+                        enable: true,
+                        speed: 0.5,
+                        direction: "none",
+                        random: true,
+                        outModes: { default: "out" }
+                    }
+                },
+                interactivity: { events: { onHover: { enable: false } }, resize: { enable: true } },
+                retina_detect: true
+            }).then(() => console.log('tsParticles loaded')).catch(err => console.error('tsParticles error:', err));
+        } else {
+            console.error('tsParticles not loaded');
+        }
+
         // Инициализация Telegram Web App
         if (window.Telegram?.WebApp) {
             window.Telegram.WebApp.ready();
@@ -491,6 +559,17 @@
 
             window.addEventListener('resize', debounce(renderProducts, 100));
             startReviewsAutoScroll();
+            const deliveryRadios = document.querySelectorAll('input[name="delivery_type"]');
+            const addressWrapper = document.querySelector('#address-wrapper');
+            deliveryRadios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    if (e.target.value === 'pickup') {
+                        addressWrapper.classList.add('hidden');
+                    } else {
+                        addressWrapper.classList.remove('hidden');
+                    }
+                });
+            });
         }
 
         // Reviews Auto-Scroll
@@ -681,6 +760,16 @@
                 </div>
                 <div class="border-t bg-white p-6 space-y-4">
                     <h3 class="font-bold text-base text-gray-800">Оформление заказа</h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2">
+                            <input type="radio" name="delivery_type" value="delivery" checked>
+                            Доставка (+300 руб если сумма < 2000)
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="radio" name="delivery_type" value="pickup">
+                            Самовывоз (Алексеева 43)
+                        </label>
+                    </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="text-sm font-semibold text-gray-600 mb-1 flex items-center gap-1">
@@ -696,7 +785,7 @@
                             <input type="time" class="input-field border rounded-lg p-3 text-sm" min="09:00" max="21:00" required>
                         </div>
                     </div>
-                    <div>
+                    <div id="address-wrapper">
                         <label class="text-sm font-semibold text-gray-600 mb-1 flex items-center gap-1">
                             <svg class="icon w-5 h-5" viewBox="0 0 24 24">
                                 <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
@@ -830,7 +919,7 @@
                             <h3 class="font-semibold text-base text-gray-800">Начинка</h3>
                             <div class="grid grid-cols-2 gap-3">
                                 ${product.fillings.map(f => `
-                                    <button class="filling-btn p-3 rounded-lg border ${appState.selectedFilling === f.name ? 'active border-pink-300 bg-pink-50' : 'hover:border-pink-300'} text-left shadow-sm" onclick="selectFilling('${f.name}')">
+                                    <button class="filling-btn p-3 rounded-lg border text-center ${appState.selectedFilling === f.name ? 'active border-pink-300 bg-pink-50' : 'hover:border-pink-300'} shadow-sm" onclick="selectFilling('${f.name}')">
                                         <div class="font-semibold text-sm">${f.name}</div>
                                     </button>
                                 `).join('')}
@@ -905,7 +994,6 @@
                             <div class="flex items-center gap-1">
                                 ${Array(Math.round(review.rating)).fill().map(() => `
                                     <svg class="rating-star w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9ევ
                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                     </svg>
                                 `).join('')}
@@ -995,9 +1083,14 @@
             const timeInput = document.querySelector('input[type="time"]');
             const addressInput = document.querySelector('input[data-address]');
             const phoneInput = document.querySelector('input[type="tel"]');
+            const deliveryType = document.querySelector('input[name="delivery_type"]:checked')?.value;
 
-            if (!dateInput.value || !timeInput.value || !addressInput.value || !phoneInput.value) {
+            if (!dateInput.value || !timeInput.value || !phoneInput.value || !deliveryType) {
                 showNotification('Заполните все поля', 'error');
+                return;
+            }
+            if (deliveryType === 'delivery' && !addressInput.value) {
+                showNotification('Заполните адрес доставки', 'error');
                 return;
             }
 
@@ -1026,7 +1119,7 @@
                 const size = product.sizes ? product.sizes.find(s => s.size === item.selectedSize) : null;
                 return sum + (size ? size.price : item.price) * item.quantity;
             }, 0);
-            const deliveryFee = totalAmount >= 2000 ? 0 : 300;
+            const deliveryFee = (deliveryType === 'delivery' && totalAmount < 2000) ? 300 : 0;
             const finalAmount = totalAmount + deliveryFee;
 
             const telegram = window.Telegram?.WebApp;
@@ -1051,11 +1144,12 @@
                         filling: item.selectedFilling || null
                     })),
                     total_amount: totalAmount,
+                    delivery_type: deliveryType,
                     delivery_fee: deliveryFee,
                     final_amount: finalAmount,
                     date: dateInput.value,
                     time: timeInput.value,
-                    address: addressInput.value,
+                    address: (deliveryType === 'pickup' ? 'Алексеева 43' : addressInput.value),
                     phone: phoneInput.value
                 }
             };
@@ -1067,7 +1161,7 @@
                 mode: 'no-cors'
             })
                 .then(() => {
-                    showNotification('Заказ успешно оформлен! Ожидайте подтверждения.', 'success');
+                    showNotification('Заказ успешно оформлен! Ожидайте подтверждения. Оплата наличными.', 'success');
                     clearCart();
                     closeCart();
                 })
