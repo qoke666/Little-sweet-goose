@@ -58,32 +58,62 @@
             scroll-snap-type: x mandatory;
             scrollbar-width: none;
             -ms-overflow-style: none;
+            position: relative;
+            width: 343px;
+            height: 136px;
+            margin: 8px auto;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #000;
+            max-width: 100%;
         }
         .carousel::-webkit-scrollbar {
             display: none;
         }
-        .reviews-carousel {
-            display: flex;
-            overflow-x: auto;
-            white-space: nowrap;
-            scroll-behavior: smooth;
-            touch-action: pan-x;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-        .reviews-carousel::-webkit-scrollbar {
-            display: none;
-        }
-        .review-card {
-            scroll-snap-align: start;
-            flex: 0 0 280px;
-            margin-right: 12px;
-            transition: transform 0.2s ease;
-        }
-        .review-card:hover {
-            transform: translateY(-4px);
-        }
+        .carousel a {
+      display: block;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      transition: opacity .5s linear, transform .5s linear;
+      transform: scale(1);
+    }
+    .carousel a.active {
+      opacity: 1;
+      z-index: 1;
+      transform: scale(1.02);
+    }
+    .carousel img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .carousel .hot {
+      position: absolute;
+      top: 8px;
+      left: 16px;
+      font-size: 20px;
+      font-weight: 500;
+      color: #ffffff;
+      z-index: 2;
+    }
+    .carousel-dots {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 5px;
+      z-index: 2;
+    }
+    .carousel-dots .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      cursor: pointer;
+      transition: background .3s;
+    }
+    .carousel-dots .dot.active { background: #d5fd02; }
         .cart-modal, .product-detail {
             height: 100dvh;
             max-height: 100dvh;
@@ -187,9 +217,6 @@
             }
             .filling-image-container {
                 max-height: 120px;
-            }
-            .review-card {
-                flex: 0 0 320px;
             }
         }
         @media (min-width: 1024px) {
@@ -503,7 +530,7 @@
                 });
             });
 
-            [elements.categoryCarousel, elements.promoCarousel, elements.reviewsCarousel].forEach(carousel => {
+            [elements.categoryCarousel, elements.promoCarousel].forEach(carousel => {
                 carousel.addEventListener('wheel', (e) => {
                     e.preventDefault();
                     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
@@ -512,15 +539,17 @@
             });
 
             window.addEventListener('resize', debounce(renderProducts, 100));
-            startReviewsAutoScroll();
             const deliveryRadios = document.querySelectorAll('input[name="delivery_type"]');
-            const addressWrapper = document.querySelector('#address-wrapper');
+            const deliveryForm = document.querySelector('#delivery-form');
+            const pickupForm = document.querySelector('#pickup-form');
             deliveryRadios.forEach(radio => {
                 radio.addEventListener('change', (e) => {
                     if (e.target.value === 'pickup') {
-                        addressWrapper.classList.add('hidden');
+                        deliveryForm.classList.add('hidden');
+                        pickupForm.classList.remove('hidden');
                     } else {
-                        addressWrapper.classList.remove('hidden');
+                        deliveryForm.classList.remove('hidden');
+                        pickupForm.classList.add('hidden');
                     }
                 });
             });
@@ -548,54 +577,6 @@
 
             setInterval(nextSlide, 3000);
             showSlide(currentIndex);
-        }
-
-        // Reviews Auto-Scroll
-        function startReviewsAutoScroll() {
-            const carousel = elements.reviewsCarousel;
-            if (!carousel) return;
-
-            let scrollPosition = 0;
-            const scrollSpeed = 1;
-            const maxScroll = carousel.scrollWidth - carousel.clientWidth;
-
-            function autoScroll() {
-                scrollPosition += scrollSpeed;
-                if (scrollPosition >= maxScroll) {
-                    scrollPosition = 0;
-                    carousel.scrollTo({ left: 0, behavior: 'auto' });
-                } else {
-                    carousel.scrollTo({ left: scrollPosition, behavior: 'auto' });
-                }
-                requestAnimationFrame(autoScroll);
-            }
-
-            requestAnimationFrame(autoScroll);
-
-            let isUserInteracting = false;
-            carousel.addEventListener('touchstart', () => isUserInteracting = true);
-            carousel.addEventListener('touchend', () => {
-                setTimeout(() => isUserInteracting = false, 1000);
-            });
-            carousel.addEventListener('wheel', () => {
-                isUserInteracting = true;
-                setTimeout(() => isUserInteracting = false, 1000);
-            });
-
-            function conditionalAutoScroll() {
-                if (!isUserInteracting) {
-                    scrollPosition += scrollSpeed;
-                    if (scrollPosition >= maxScroll) {
-                        scrollPosition = 0;
-                        carousel.scrollTo({ left: 0, behavior: 'auto' });
-                    } else {
-                        carousel.scrollTo({ left: scrollPosition, behavior: 'auto' });
-                    }
-                }
-                requestAnimationFrame(conditionalAutoScroll);
-            }
-
-            requestAnimationFrame(conditionalAutoScroll);
         }
 
         // Cart Functions
@@ -763,7 +744,7 @@
                             <input type="time" class="input-field border rounded-lg p-3 text-sm" min="09:00" max="21:00" required>
                         </div>
                     </div>
-                    <div id="address-wrapper">
+                    <div id="delivery-form">
                         <label class="text-sm font-semibold text-gray-600 mb-1 flex items-center gap-1">
                             <svg class="icon w-5 h-5" viewBox="0 0 24 24">
                                 <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
@@ -771,6 +752,15 @@
                             Адрес доставки
                         </label>
                         <input type="text" placeholder="Улица, дом, квартира" class="input-field border rounded-lg p-3 text-sm" data-address required>
+                    </div>
+                    <div id="pickup-form" class="hidden">
+                        <label class="text-sm font-semibold text-gray-600 mb-1 flex items-center gap-1">
+                            <svg class="icon w-5 h-5" viewBox="0 0 24 24">
+                                <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            </svg>
+                            Адрес самовывоза
+                        </label>
+                        <input type="text" value="Алексеева 43" class="input-field border rounded-lg p-3 text-sm" disabled>
                     </div>
                     <div>
                         <label class="text-sm font-semibold text-gray-600 mb-1 flex items-center gap-1">
