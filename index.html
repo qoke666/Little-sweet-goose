@@ -48,6 +48,20 @@
         .category-pill:hover {
             transform: scale(1.05);
         }
+        .category-container {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding: 8px 0;
+            gap: 8px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        .category-container::-webkit-scrollbar {
+            display: none;
+        }
         .carousel {
             display: flex;
             overflow-x: auto;
@@ -71,49 +85,49 @@
             display: none;
         }
         .carousel a {
-      display: block;
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      opacity: 0;
-      transition: opacity .5s linear, transform .5s linear;
-      transform: scale(1);
-    }
-    .carousel a.active {
-      opacity: 1;
-      z-index: 1;
-      transform: scale(1.02);
-    }
-    .carousel img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .carousel .hot {
-      position: absolute;
-      top: 8px;
-      left: 16px;
-      font-size: 20px;
-      font-weight: 500;
-      color: #ffffff;
-      z-index: 2;
-    }
-    .carousel-dots {
-      position: absolute;
-      bottom: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 5px;
-      z-index: 2;
-    }
-    .carousel-dots .dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.3);
-      cursor: pointer;
-      transition: background .3s;
-    }
-    .carousel-dots .dot.active { background: #d5fd02; }
+            display: block;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity .5s linear, transform .5s linear;
+            transform: scale(1);
+        }
+        .carousel a.active {
+            opacity: 1;
+            z-index: 1;
+            transform: scale(1.02);
+        }
+        .carousel img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .carousel .hot {
+            position: absolute;
+            top: 8px;
+            left: 16px;
+            font-size: 20px;
+            font-weight: 500;
+            color: #ffffff;
+            z-index: 2;
+        }
+        .carousel-dots {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+            z-index: 2;
+        }
+        .carousel-dots .dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: background .3s;
+        }
+        .carousel-dots .dot.active { background: #d5fd02; }
         .cart-modal, .product-detail {
             height: 100dvh;
             max-height: 100dvh;
@@ -127,6 +141,19 @@
         .input-field:focus {
             border-color: #db2777;
             outline: none;
+        }
+        .quantity-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            transition: background 0.2s;
+        }
+        .quantity-btn:hover {
+            background: #e5e7eb;
         }
         .quantity-btn svg {
             width: 16px;
@@ -164,7 +191,7 @@
             color: #4b5563;
         }
         .header-elements {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
@@ -173,6 +200,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .size-btn.active {
             background-color: #fce7f3;
@@ -218,41 +247,32 @@
             .filling-image-container {
                 max-height: 120px;
             }
+            .category-container {
+                justify-content: center;
+            }
         }
         @media (min-width: 1024px) {
             .product-card {
                 width: calc((100% - 4rem) / 4);
             }
         }
-        /* Floating pink particles */
         .particle {
             position: absolute;
-            background: rgba(255, 105, 180, 0.8); /* Pink with transparency */
+            background: rgba(255, 105, 180, 0.8);
             border-radius: 50%;
             animation: float 15s infinite ease-in-out;
             pointer-events: none;
         }
         @keyframes float {
-            0% {
-                transform: translateY(0);
-                opacity: 0.8;
-            }
-            50% {
-                transform: translateY(-100px);
-                opacity: 0.5;
-            }
-            100% {
-                transform: translateY(0);
-                opacity: 0.8;
-            }
+            0% { transform: translateY(0); opacity: 0.8; }
+            50% { transform: translateY(-100px); opacity: 0.5; }
+            100% { transform: translateY(0); opacity: 0.8; }
         }
     </style>
 </head>
 <body class="bg-gray-100 relative">
     <div id="tsparticles"></div>
-    <!-- Main Content -->
     <main class="pt-24 pb-20 px-4 max-w-7xl mx-auto relative">
-        <!-- Header Elements -->
         <div class="header-elements">
             <div class="relative">
                 <button id="cart-btn" class="p-2 hover:bg-gray-100 rounded-full">
@@ -273,49 +293,42 @@
             </div>
         </div>
 
-        <!-- Promo Carousel -->
         <div class="carousel">
             <a href="https://telegra.ph/SCAM-kejs-ot-AMERIOBET-hronologiya-prufy-i-dolg-na-90-000-03-18" target="_blank" class="active">
-              <img src="https://i.postimg.cc/bJqQWjv5/photo-2025-03-18-15-18-14.jpg" alt="скам" />
+                <img src="https://i.postimg.cc/bJqQWjv5/photo-2025-03-18-15-18-14.jpg" alt="скам" />
             </a>
             <a href="https://www.instagram.com/reel/DKHZPnYtjQD/?igsh=1234567890" target="_blank">
-              <img src="https://i.postimg.cc/Z57qjBRv/feat-mac.jpg" alt="мак" />
+                <img src="https://i.postimg.cc/Z57qjBRv/feat-mac.jpg" alt="мак" />
             </a>
             <div class="hot"></div>
             <div class="carousel-dots">
-              <div class="dot active"></div>
-              <div class="dot"></div>
-              <div class="dot"></div>
+                <div class="dot active"></div>
+                <div class="dot"></div>
             </div>
-          </div>
-
-        <!-- Categories -->
-        <div id="category-carousel" class="carousel flex gap-3 mb-8">
-            <button class="category-pill px-5 py-2.5 bg-pink-100 text-pink-600 rounded-full font-semibold text-sm active shadow-sm" data-category="all">Все</button>
-            <button class="category-pill px-5 py-2.5 bg-gray-100 hover:bg-pink-100 rounded-full font-semibold text-sm shadow-sm" data-category="bento">Бенто-торт</button>
-            <button class="category-pill px-5 py-2.5 bg-gray-100 hover:bg-pink-100 rounded-full font-semibold text-sm shadow-sm" data-category="mochi">Моти</button>
-            <button class="category-pill px-5 py-2.5 bg-gray-100 hover:bg-pink-100 rounded-full font-semibold text-sm shadow-sm" data-category="kartoshka">Картошка</button>
-            <button class="category-pill px-5 py-2.5 bg-gray-100 hover:bg-pink-100 rounded-full font-semibold text-sm shadow-sm" data-category="truffles">Трюфели</button>
-            <button class="category-pill px-5 py-2.5 bg-gray-100 hover:bg-pink-100 rounded-full font-semibold text-sm shadow-sm" data-category="madeleine">Мадлен</button>
         </div>
 
-        <!-- New Products -->
+        <div id="category-container" class="category-container">
+            <button class="category-pill px-5 py-2.5 bg-pink-100 text-pink-600 rounded-full font-semibold text-sm active shadow-sm" data-category="all">Все</button>
+            <button class="category-pill px-5 py-2.5 bg-gray-100 hover:bg-pink-100 text-gray-800 hover:text-pink-600 rounded-full font-semibold text-sm shadow-sm" data-category="bento">Бенто-торт</button>
+            <button class="category-pill px-5 py-2.5 bg-gray-100 hover:bg-pink-100 text-gray-800 hover:text-pink-600 rounded-full font-semibold text-sm shadow-sm" data-category="mochi">Моти</button>
+            <button class="category-pill px-5 py-2.5 bg-gray-100 hover:bg-pink-100 text-gray-800 hover:text-pink-600 rounded-full font-semibold text-sm shadow-sm" data-category="kartoshka">Картошка</button>
+            <button class="category-pill px-5 py-2.5 bg-gray-100 hover:bg-pink-100 text-gray-800 hover:text-pink-600 rounded-full font-semibold text-sm shadow-sm" data-category="truffles">Трюфели</button>
+            <button class="category-pill px-5 py-2.5 bg-gray-100 hover:bg-pink-100 text-gray-800 hover:text-pink-600 rounded-full font-semibold text-sm shadow-sm" data-category="madeleine">Мадлен</button>
+        </div>
+
         <div class="flex items-center justify-between mb-5">
             <h2 class="text-xl font-bold text-gray-800">Новинки</h2>
             <span id="new-products-count" class="text-sm text-gray-600">0 товаров</span>
         </div>
         <div id="new-products-grid" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 mb-10"></div>
 
-        <!-- Top Products -->
         <div class="flex items-center justify-between mb-5">
             <h2 class="text-xl font-bold text-gray-800">Топ-позиции</h2>
             <span id="top-products-count" class="text-sm text-gray-600">0 товаров</span>
         </div>
         <div id="top-products-grid" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 mb-10"></div>
-
     </main>
 
-    <!-- Cart Modal -->
     <div id="cart-modal" class="fixed inset-0 bg-white z-50 transform translate-y-full transition-transform duration-300">
         <div class="flex flex-col h-full">
             <div class="flex items-center justify-between p-4 border-b bg-white shadow-sm">
@@ -338,7 +351,6 @@
         </div>
     </div>
 
-    <!-- Product Detail Modal -->
     <div id="product-detail" class="fixed inset-0 bg-white z-50 transform translate-y-full transition-transform duration-300">
         <div class="flex flex-col h-full">
             <div class="flex items-center justify-between p-4 border-b bg-white shadow-sm">
@@ -396,14 +408,12 @@
             console.error('tsParticles not loaded');
         }
 
-        // Инициализация Telegram Web App
         if (window.Telegram?.WebApp) {
             window.Telegram.WebApp.ready();
             window.Telegram.WebApp.expand();
             window.Telegram.WebApp.disableVerticalSwipes();
         }
 
-        // App State
         const appState = {
             currentView: 'main',
             activeCategory: 'all',
@@ -413,7 +423,6 @@
             selectedFilling: null
         };
 
-        // Mock Data
         const products = [
             {
                 id: '1',
@@ -491,12 +500,11 @@
             }
         ];
 
-        // DOM Elements
         const elements = {
             cartBtn: document.getElementById('cart-btn'),
             cartBadge: document.getElementById('cart-badge'),
             categories: document.querySelectorAll('.category-pill'),
-            categoryCarousel: document.getElementById('category-carousel'),
+            categoryContainer: document.getElementById('category-container'),
             promoCarousel: document.querySelector('.carousel'),
             newProductsGrid: document.getElementById('new-products-grid'),
             topProductsGrid: document.getElementById('top-products-grid'),
@@ -513,7 +521,6 @@
             detailContent: document.getElementById('detail-content')
         };
 
-        // Event Listeners
         function initEventListeners() {
             elements.cartBtn.addEventListener('click', openCart);
             elements.cartBackBtn.addEventListener('click', closeCart);
@@ -522,15 +529,19 @@
 
             elements.categories.forEach(btn => {
                 btn.addEventListener('click', () => {
-                    elements.categories.forEach(b => b.classList.remove('active', 'bg-pink-100', 'text-pink-600'));
+                    elements.categories.forEach(b => {
+                        b.classList.remove('active', 'bg-pink-100', 'text-pink-600');
+                        b.classList.add('bg-gray-100', 'text-gray-800');
+                    });
                     btn.classList.add('active', 'bg-pink-100', 'text-pink-600');
+                    btn.classList.remove('bg-gray-100', 'text-gray-800');
                     appState.activeCategory = btn.dataset.category;
                     renderProducts();
-                    elements.categoryCarousel.scrollTo({ left: btn.offsetLeft - 16, behavior: 'smooth' });
+                    elements.categoryContainer.scrollTo({ left: btn.offsetLeft - 16, behavior: 'smooth' });
                 });
             });
 
-            [elements.categoryCarousel, elements.promoCarousel].forEach(carousel => {
+            [elements.categoryContainer, elements.promoCarousel].forEach(carousel => {
                 carousel.addEventListener('wheel', (e) => {
                     e.preventDefault();
                     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
@@ -539,11 +550,10 @@
             });
 
             window.addEventListener('resize', debounce(renderProducts, 100));
-            const deliveryRadios = document.querySelectorAll('input[name="delivery_type"]');
-            const deliveryForm = document.querySelector('#delivery-form');
-            const pickupForm = document.querySelector('#pickup-form');
-            deliveryRadios.forEach(radio => {
-                radio.addEventListener('change', (e) => {
+            document.addEventListener('change', (e) => {
+                if (e.target.name === 'delivery_type') {
+                    const deliveryForm = document.getElementById('delivery-form');
+                    const pickupForm = document.getElementById('pickup-form');
                     if (e.target.value === 'pickup') {
                         deliveryForm.classList.add('hidden');
                         pickupForm.classList.remove('hidden');
@@ -551,8 +561,9 @@
                         deliveryForm.classList.remove('hidden');
                         pickupForm.classList.add('hidden');
                     }
-                });
+                }
             });
+
             startCarousel();
         }
 
@@ -579,7 +590,6 @@
             showSlide(currentIndex);
         }
 
-        // Cart Functions
         function openCart() {
             elements.cartModal.classList.add('open');
             elements.cartModal.style.transform = 'translateY(0)';
@@ -694,17 +704,9 @@
                                     </p>
                                     <div class="flex items-center justify-between">
                                         <div class="quantity-controls flex items-center gap-3">
-                                            <button class="quantity-btn p-2 bg-gray-100 rounded-full hover:bg-gray-200" onclick="updateCartQuantity('${item.id}', ${item.quantity - 1}, '${item.selectedSize}', '${item.selectedFilling || ''}')">
-                                                <svg class="icon w-5 h-5" viewBox="0 0 24 24">
-                                                    <path d="M20 12H4"/>
-                                                </svg>
-                                            </button>
+                                            <button class="quantity-btn" onclick="updateCartQuantity('${item.id}', ${item.quantity - 1}, '${item.selectedSize}', '${item.selectedFilling || ''}')">-</button>
                                             <span class="w-8 text-center font-semibold text-base">${item.quantity}</span>
-                                            <button class="quantity-btn p-2 bg-gray-100 rounded-full hover:bg-gray-200" onclick="updateCartQuantity('${item.id}', ${item.quantity + 1}, '${item.selectedSize}', '${item.selectedFilling || ''}')">
-                                                <svg class="icon w-5 h-5" viewBox="0 0 24 24">
-                                                    <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                                                </svg>
-                                            </button>
+                                            <button class="quantity-btn" onclick="updateCartQuantity('${item.id}', ${item.quantity + 1}, '${item.selectedSize}', '${item.selectedFilling || ''}')">+</button>
                                         </div>
                                         <button onclick="removeFromCart('${item.id}', '${item.selectedSize}', '${item.selectedFilling || ''}')" class="p-2 text-red-500 hover:bg-red-50 rounded-lg">
                                             <svg class="icon w-5 h-5" viewBox="0 0 24 24">
@@ -721,13 +723,31 @@
                     <h3 class="font-bold text-base text-gray-800">Оформление заказа</h3>
                     <div class="space-y-2">
                         <label class="flex items-center gap-2">
-                            <input type="radio" name="delivery_type" value="delivery" checked>
-                            Доставка (+300 руб если сумма < 2000)
+                            <input type="radio" name="delivery_type" value="delivery" checked class="text-pink-600 focus:ring-pink-600">
+                            <span class="text-sm text-gray-800">Доставка (+300 руб если сумма < 2000)</span>
                         </label>
                         <label class="flex items-center gap-2">
-                            <input type="radio" name="delivery_type" value="pickup">
-                            Самовывоз (Алексеева 43)
+                            <input type="radio" name="delivery_type" value="pickup" class="text-pink-600 focus:ring-pink-600">
+                            <span class="text-sm text-gray-800">Самовывоз (Алексеева 43)</span>
                         </label>
+                    </div>
+                    <div id="delivery-form">
+                        <label class="text-sm font-semibold text-gray-600 mb-1 flex items-center gap-1">
+                            <svg class="icon w-5 h-5" viewBox="0 0 24 24">
+                                <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            </svg>
+                            Адрес доставки
+                        </label>
+                        <input type="text" placeholder="Улица, дом, квартира" class="input-field border rounded-lg p-3 text-sm w-full" data-address required>
+                    </div>
+                    <div id="pickup-form" class="hidden">
+                        <label class="text-sm font-semibold text-gray-600 mb-1 flex items-center gap-1">
+                            <svg class="icon w-5 h-5" viewBox="0 0 24 24">
+                                <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            </svg>
+                            Адрес самовывоза
+                        </label>
+                        <input type="text" value="Алексеева 43" class="input-field border rounded-lg p-3 text-sm w-full" disabled>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -737,30 +757,12 @@
                                 </svg>
                                 Дата
                             </label>
-                            <input type="date" class="input-field border rounded-lg p-3 text-sm" min="${new Date().toISOString().split('T')[0]}" required>
+                            <input type="date" class="input-field border rounded-lg p-3 text-sm w-full" min="${new Date().toISOString().split('T')[0]}" required>
                         </div>
                         <div>
                             <label class="text-sm font-semibold text-gray-600 mb-1 block">Время</label>
-                            <input type="time" class="input-field border rounded-lg p-3 text-sm" min="09:00" max="21:00" required>
+                            <input type="time" class="input-field border rounded-lg p-3 text-sm w-full" min="09:00" max="21:00" required>
                         </div>
-                    </div>
-                    <div id="delivery-form">
-                        <label class="text-sm font-semibold text-gray-600 mb-1 flex items-center gap-1">
-                            <svg class="icon w-5 h-5" viewBox="0 0 24 24">
-                                <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                            </svg>
-                            Адрес доставки
-                        </label>
-                        <input type="text" placeholder="Улица, дом, квартира" class="input-field border rounded-lg p-3 text-sm" data-address required>
-                    </div>
-                    <div id="pickup-form" class="hidden">
-                        <label class="text-sm font-semibold text-gray-600 mb-1 flex items-center gap-1">
-                            <svg class="icon w-5 h-5" viewBox="0 0 24 24">
-                                <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                            </svg>
-                            Адрес самовывоза
-                        </label>
-                        <input type="text" value="Алексеева 43" class="input-field border rounded-lg p-3 text-sm" disabled>
                     </div>
                     <div>
                         <label class="text-sm font-semibold text-gray-600 mb-1 flex items-center gap-1">
@@ -769,7 +771,7 @@
                             </svg>
                             Телефон
                         </label>
-                        <input type="tel" placeholder="+7 (999) 123-45-67" class="input-field border rounded-lg p-3 text-sm" required>
+                        <input type="tel" placeholder="+7 (999) 123-45-67" class="input-field border rounded-lg p-3 text-sm w-full" required>
                     </div>
                     <div class="space-y-3 pt-3">
                         <div class="flex justify-between text-sm text-gray-800">
@@ -804,7 +806,6 @@
             `;
         }
 
-        // Product Detail Functions
         function openProductDetailById(productId) {
             const product = products.find(p => p.id === productId);
             if (!product) {
@@ -906,17 +907,9 @@
                     </div>
                     <div class="space-y-3 pt-3">
                         <div class="flex items-center justify-center gap-4">
-                            <button class="quantity-btn p-2 bg-gray-100 rounded-full hover:bg-gray-200" onclick="changeDetailQuantity(-1)">
-                                <svg class="icon w-5 h-5" viewBox="0 0 24 24">
-                                    <path d="M20 12H4"/>
-                                </svg>
-                            </button>
+                            <button class="quantity-btn" onclick="changeDetailQuantity(-1)">-</button>
                             <span id="detail-quantity" class="font-semibold text-lg">1</span>
-                            <button class="quantity-btn p-2 bg-gray-100 rounded-full hover:bg-gray-200" onclick="changeDetailQuantity(1)">
-                                <svg class="icon w-5 h-5" viewBox="0 0 24 24">
-                                    <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                                </svg>
-                            </button>
+                            <button class="quantity-btn" onclick="changeDetailQuantity(1)">+</button>
                         </div>
                         <button onclick="addToCartFromDetail()" class="btn-primary w-full h-12 bg-pink-600 text-white rounded-lg text-base font-semibold shadow-md">
                             Добавить <span id="detail-total-price">${discountedPrice}</span> ₽
@@ -926,7 +919,6 @@
             `;
         }
 
-        // Product Functions
         function getFilteredProducts() {
             let filtered = products;
             if (appState.activeCategory && appState.activeCategory !== 'all') {
@@ -942,7 +934,7 @@
                 elements.newProductsGrid.classList.toggle('hidden', newProducts.length === 0);
                 elements.newProductsGrid.innerHTML = newProducts.map(product => renderProductCard(product)).join('');
 
-                const topProducts = products.sort((a, b) => b.rating - a.rating).slice(0, 4);
+                const topProducts = products.sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 4);
                 elements.topProductsCount.textContent = `${topProducts.length} товаров`;
                 elements.topProductsGrid.classList.toggle('hidden', topProducts.length === 0);
                 elements.topProductsGrid.innerHTML = topProducts.map(product => renderProductCard(product)).join('');
@@ -960,9 +952,7 @@
                         ${product.discount ? `<div class="discount-badge">-${product.discount}%</div>` : ''}
                         ${product.isNew ? '<div class="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">NEW</div>' : ''}
                         <button onclick="addToCartById('${product.id}'); event.stopPropagation();" class="add-to-cart-btn absolute bottom-2 right-2 bg-white border border-gray-300 hover:bg-gray-100 p-2 rounded-full shadow-sm">
-                            <svg class="icon w-5 h-5" viewBox="0 0 24 24">
-                                <path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                            </svg>
+                            +
                         </button>
                     </div>
                     <div class="p-4">
@@ -984,7 +974,6 @@
             `;
         }
 
-        // Utility Functions
         function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
             notification.classList.add('fixed', 'bottom-4', 'left-1/2', 'transform', '-translate-x-1/2', 'z-50', 'px-5', 'py-3', 'rounded-lg', 'text-white', 'text-base', 'font-semibold', 'animate-zoom-in', 'shadow-lg');
@@ -1126,7 +1115,6 @@
             chevron.classList.toggle('rotate-180');
         }
 
-        // Initialize App
         function init() {
             const savedCart = localStorage.getItem('cart');
             if (savedCart) {
