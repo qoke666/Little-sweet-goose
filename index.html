@@ -1,605 +1,563 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Little Sweet Goose</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            overscroll-behavior: none;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-            background-color: #f3f4f6;
-            position: relative;
-        }
-        #tsparticles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
-        .animate-zoom-in { animation: zoomIn 0.3s ease forwards; }
-        .animate-fade-in { animation: fadeIn 0.3s ease forwards; }
-        @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>Little Sweet Goose — manual filling offsets</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin:0; background:#f3f4f6; }
+  .header-elements { position: fixed; top:0; left:0; right:0; z-index:40; padding:16px; display:flex; align-items:center; justify-content:space-between; background:#fff; box-shadow:0 2px 4px rgba(0,0,0,.08); }
+  .product-image-carousel { position: relative; width:100%; height:288px; overflow:hidden; border-radius:12px; background:#e5e7eb; margin-bottom:16px; }
+  .product-image-carousel img { width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; opacity:0; transition:opacity .38s ease, transform .38s ease; }
+  .product-image-carousel img.active { opacity:1; z-index:1; transform:translateX(0); }
+  .product-image-dots { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); display:flex; gap:5px; z-index:2; }
+  .product-image-dots .dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.5); }
+  .product-image-dots .dot.active { background:#fff; }
 
-        .carousel { display: flex; overflow-x: auto; white-space: nowrap; scroll-behavior: smooth; touch-action: pan-x; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; position: relative; width: 343px; height: 136px; margin: 8px auto; border-radius: 6px; overflow: hidden; background: #000; max-width: 100%; }
-        .carousel::-webkit-scrollbar { display: none; }
-        .carousel a { display: block; width: 100%; height: 100%; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity .5s linear, transform .5s linear; transform: scale(1); }
-        .carousel a.active { opacity: 1; z-index: 1; transform: scale(1.02); }
-        .carousel img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .carousel .hot { position: absolute; top: 8px; left: 16px; font-size: 20px; font-weight: 500; color: #ffffff; z-index: 2; }
-        .carousel-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; z-index: 2; }
-        .carousel-dots .dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: background .3s; }
-        .carousel-dots .dot.active { background: #d5fd02; }
+  /* Контейнер для картинки начинки — картинка центрируется, затем применяется офсет */
+  .filling-image-container { position: relative; aspect-ratio:4/3; max-height:140px; overflow:hidden; border-radius:8px; background:#fff; display:block; }
+  .filling-image {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    /* По умолчанию центрируем (-50%,-50%), и прибавляем смещение offsetX/offsetY в процентах */
+    transform: translate(calc(-50% + var(--fx, 0%)), calc(-50% + var(--fy, 0%)));
+    max-width: 85%;
+    max-height: 88px;
+    object-fit: contain;
+    border-radius:8px;
+    transition: transform .12s linear;
+    user-select: none;
+    pointer-events: none; /* чтобы не мешала кликам по кнопкам вокруг */
+  }
 
-        /* product image carousel */
-        .product-image-carousel { position: relative; width: 100%; height: 288px; overflow: hidden; border-radius: 12px; background: #e5e7eb; margin-bottom: 16px; }
-        .product-image-carousel img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity .38s ease, transform .38s ease; transform: translateX(0); }
-        .product-image-carousel img.active { opacity: 1; z-index: 1; transform: translateX(0); }
-        .product-image-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; z-index: 2; }
-        .product-image-dots .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; transition: background .3s; }
-        .product-image-dots .dot.active { background: #ffffff; }
-
-        .cart-modal, .product-detail { height: 100dvh; max-height: 100dvh; overflow-y: auto; }
-        .input-field { width: 100%; box-sizing: border-box; transition: border-color 0.2s ease; }
-        .input-field:focus { border-color: #db2777; outline: none; }
-        .quantity-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: #f3f4f6; transition: background 0.2s; }
-        .quantity-btn:hover { background: #e5e7eb; }
-        .quantity-btn svg { width: 16px; height: 16px; }
-        .hot-badge { position: absolute; top: 8px; left: 8px; background: #dc2626; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; }
-        .social-links a { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; transition: background-color 0.2s, transform 0.2s; }
-        .social-links a:hover { background-color: #e5e7eb; transform: scale(1.1); }
-        .social-links i { font-size: 22px; color: #4b5563; }
-        .header-elements { position: fixed; top: 0; left: 0; right: 0; z-index: 40; padding: 16px; display: flex; align-items: center; justify-content: space-between; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .size-btn.active, .filling-btn.active { background-color: #fce7f3; border-color: #db2777; }
-
-        /* Центрируем картинку начинки надежно — высокая специфичность и явный класс */
-        .filling-image-container { aspect-ratio: 4/3; max-height: 96px; overflow: hidden; display: flex; justify-content: center; align-items: center; }
-        .filling-image { display: block; margin: 0 auto; max-width: 85%; max-height: 88px; object-fit: contain; border-radius: 8px; }
-
-        .btn-primary { transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
-        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); }
-        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
-        .add-to-cart-btn { position: absolute; bottom: 12px; right: 12px; width: 40px; height: 40px; background-color: #db2777; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); transition: all 0.2s ease-in-out; border: none; z-index: 10; }
-        .add-to-cart-btn:hover { transform: scale(1.1); background-color: #c41d68; }
-        .add-to-cart-btn svg { width: 24px; height: 24px; }
-        @media (min-width: 768px) {
-            .product-card { transition: transform 0.2s ease; }
-            .product-card:hover { transform: translateY(-4px); }
-        }
-
-        /* checkout modal */
-        #checkout-modal { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; transform: translateY(110%); transition: transform .28s ease; background: white; border-top-left-radius: 12px; border-top-right-radius: 12px; box-shadow: 0 -6px 24px rgba(0,0,0,0.12); max-height: 85vh; overflow: auto; }
-        #checkout-modal.open { transform: translateY(0); }
-        /* ensure cart items scroll correctly */
-        #cart-content .cart-list { max-height: calc(100vh - 220px); overflow: auto; padding: 1rem; }
-    </style>
+  .filling-btn { cursor:pointer; }
+  .size-btn { cursor:pointer; }
+  .cart-modal, .product-detail { height:100dvh; max-height:100dvh; overflow-y:auto; }
+  .input-field { width:100%; box-sizing:border-box; transition:border-color .2s; }
+  .input-field:focus { outline: none; border-color: #db2777; }
+  .quantity-btn { display:flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; background:#f3f4f6; }
+  .hot-badge { position:absolute; top:8px; left:8px; background:#dc2626; color:#fff; padding:4px 8px; border-radius:12px; font-size:10px; font-weight:700; }
+  .btn-primary { transition: all .18s ease; box-shadow:0 2px 6px rgba(0,0,0,.08); }
+  #checkout-modal { position: fixed; left:0; right:0; bottom:0; z-index:60; transform:translateY(110%); transition: transform .28s ease; background:#fff; border-top-left-radius:12px; border-top-right-radius:12px; max-height:85vh; overflow:auto; }
+  #checkout-modal.open { transform: translateY(0); }
+  .cart-list { max-height: calc(100vh - 220px); overflow:auto; padding:1rem; }
+</style>
 </head>
-<body class="bg-gray-100 relative">
-    <div id="tsparticles"></div>
-    <main class="pt-24 pb-20 px-4 max-w-7xl mx-auto relative">
-        <div class="header-elements">
-             <div class="relative">
-                <button id="cart-btn" class="p-2 hover:bg-gray-100 rounded-full">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                    </svg>
-                    <span id="cart-badge" class="absolute -top-1 -right-1 bg-pink-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
-                </button>
-            </div>
-            <h1 class="text-xl font-bold text-gray-800">Little Sweet Goose</h1>
-            <div class="social-links flex items-center gap-3">
-                <a href="https://t.me/limitedclubcpa" target="_blank" class="social-link tg-link" data-social="telegram">
-                    <i class="fab fa-telegram-plane"></i>
-                </a>
-                <a href="https://www.instagram.com/thelimitedclub.cpa?igsh=MXkwcXppMWtlZGtm" target="_blank" class="social-link" data-social="instagram">
-                    <i class="fab fa-instagram"></i>
-                </a>
-            </div>
+<body class="bg-gray-100">
+
+  <div class="header-elements">
+    <div class="flex items-center gap-3">
+      <button id="cart-btn" class="p-2 hover:bg-gray-100 rounded-full" title="Корзина">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17"/></svg>
+      </button>
+      <h1 class="text-xl font-bold">Little Sweet Goose</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="#" class="text-gray-500"><i class="fab fa-telegram-plane"></i></a>
+      <a href="#" class="text-gray-500"><i class="fab fa-instagram"></i></a>
+    </div>
+  </div>
+
+  <main class="pt-24 pb-20 px-4 max-w-7xl mx-auto relative">
+    <div class="flex items-center justify-between my-5">
+      <h2 class="text-xl font-bold text-gray-800">Товары</h2>
+      <span id="products-count" class="text-sm text-gray-600">0 товаров</span>
+    </div>
+    <div id="products-grid" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 mb-10"></div>
+  </main>
+
+  <!-- cart modal -->
+  <div id="cart-modal" class="fixed inset-0 bg-white z-50 transform translate-y-full transition-transform duration-300">
+    <div class="flex flex-col h-full">
+      <div class="flex items-center justify-between p-4 border-b bg-white shadow-sm sticky top-0">
+        <button id="cart-back-btn" title="Назад"><svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+        <h2 class="text-xl font-bold">Корзина</h2>
+        <button id="cart-close-btn" title="Закрыть"><svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+      </div>
+      <div id="cart-content" class="flex-grow flex flex-col"></div>
+    </div>
+  </div>
+
+  <!-- product detail -->
+  <div id="product-detail" class="fixed inset-0 bg-white z-50 transform translate-y-full transition-transform duration-300">
+    <div class="flex flex-col h-full">
+      <div class="flex items-center justify-between p-4 border-b bg-white shadow-sm sticky top-0">
+        <button id="detail-back-btn" title="Назад"><svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+        <h2 id="detail-title" class="text-xl font-bold"></h2>
+        <button id="detail-close-btn" title="Закрыть"><svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+      </div>
+      <div id="detail-content" class="flex-1 overflow-auto p-4"></div>
+    </div>
+  </div>
+
+  <!-- checkout modal -->
+  <div id="checkout-modal" aria-hidden="true">
+    <div class="p-4 border-b flex items-start gap-3">
+      <div class="flex-1">
+        <h3 class="text-lg font-bold">Оформление заказа</h3>
+        <p class="text-sm text-gray-600">Самовывоз: <strong>Алексеева 43</strong></p>
+      </div>
+      <button id="checkout-close" class="text-gray-500" title="Закрыть"><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <div class="p-4 space-y-4">
+      <div class="grid grid-cols-1 gap-3">
+        <label class="text-sm font-semibold">Дата самовывоза</label>
+        <input id="checkout-date" type="date" class="input-field border rounded-lg p-3 text-sm w-full" min="" required>
+        <label class="text-sm font-semibold">Время</label>
+        <input id="checkout-time" type="time" class="input-field border rounded-lg p-3 text-sm w-full" min="09:00" max="21:00" required>
+        <label class="text-sm font-semibold">Телефон для связи</label>
+        <input id="checkout-phone" type="tel" placeholder="+7 (999) 123-45-67" class="input-field border rounded-lg p-3 text-sm w-full" required>
+      </div>
+
+      <div class="flex items-center justify-between font-bold text-base text-gray-800 pt-3 border-t">
+        <span>Итого</span><span id="checkout-total" class="text-pink-600">0 ₽</span>
+      </div>
+
+      <div class="space-y-2">
+        <button id="place-order-btn" class="btn-primary w-full h-12 bg-pink-600 text-white rounded-lg text-base font-semibold flex items-center justify-center gap-2 shadow-md">Оформить заказ</button>
+        <button id="checkout-back-btn" class="w-full h-12 border rounded-lg text-base">Вернуться к корзине</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/*
+  Инструкция:
+  - Чтобы вручную сдвинуть картинку начинки, открой этот файл в редакторе.
+  - Найди массив `products` ниже. Внутри каждого объекта начинки (`fillings`) есть поля
+    offsetX и offsetY (в процентах).
+  - Пример: { name: 'Маковый лимон', image: '...', offsetX: -10, offsetY: 5 }
+    — сдвинет картинку на 10% влево и на 5% вниз от центра.
+*/
+
+const appState = {
+  cart: [],
+  selectedProduct: null,
+  selectedSize: 'S',
+  selectedFilling: null,
+  detailQuantity: 1
+};
+
+// ================== PRODUCTS (редактируй offsetX/offsetY тут) ==================
+const products = [
+  {
+    id: '1',
+    name: 'Бенто-торт',
+    description: 'Компактный торт с индивидуальным дизайном',
+    price: 1400,
+    sizes: [{size:'S',diameter:'10 см',weight:'450-550 г',price:1400}],
+    fillings: [
+      { name: 'Маковый лимон с клубникой', image: 'https://i.postimg.cc/2S7kFCFG/image.webp', offsetX: 50, offsetY: 0 },
+      { name: 'Тропики манго-маракуйя', image: 'https://i.postimg.cc/nzCnJB8S/image.webp', offsetX: 50, offsetY: 0 },
+      { name: 'Пломбир малина-апельсин', image: 'https://i.postimg.cc/Kj6VCgFT/image.webp', offsetX: 50, offsetY: 0 }
+    ],
+    images: ['https://i.postimg.cc/Wznctb7p/photo-2024-11-25-07-51-57.jpg'],
+    cartImage: 'https://i.postimg.cc/Wznctb7p/photo-2024-11-25-07-51-57.jpg',
+    category: 'bento', isHot: true
+  },
+  {
+    id: '2',
+    name: 'Моти',
+    description: 'Нежные японские рисовые пирожные',
+    price: 100,
+    fillings: [
+      { name: 'смородина', image: 'https://i.postimg.cc/kXVgzs0r/photo-2024-11-25-07-59-12.jpg', offsetX: 0, offsetY: 0 },
+      { name: 'банан', image: 'https://i.postimg.cc/bwkNNJY3/photo-2024-11-25-07-59-11.jpg', offsetX: 0, offsetY: 0 },
+      { name: 'апельсиновый мокко', image: 'https://i.postimg.cc/Kj6VCgFT/image.webp', offsetX: 0, offsetY: 0 },
+      { name: 'баунти', image: 'https://i.postimg.cc/nzCnJB8S/image.webp', offsetX: 0, offsetY: 0 },
+      { name: 'медовик', image: 'https://i.postimg.cc/2S7kFCFG/image.webp', offsetX: 0, offsetY: 0 }
+    ],
+    images: ['https://i.postimg.cc/kXVgzs0r/photo-2024-11-25-07-59-12.jpg'],
+    cartImage: 'https://i.postimg.cc/kXVgzs0r/photo-2024-11-25-07-59-12.jpg',
+    category: 'mochi', isHot: true
+  },
+  {
+    id: '3',
+    name: 'Картошка',
+    description: 'Классическое пирожное',
+    price: 120,
+    images: ['https://i.postimg.cc/yxGYW3Sr/photo-2024-11-25-08-45-29.jpg'],
+    cartImage: 'https://i.postimg.cc/yxGYW3Sr/photo-2024-11-25-08-45-29.jpg',
+    category: 'kartoshka'
+  },
+  {
+    id: '4',
+    name: 'Трюфели',
+    description: 'Шоколадные трюфели ручной работы',
+    price: 150,
+    fillings: [
+      { name: 'Апельсиновый', image: 'https://i.postimg.cc/qR9Z0t66/photo-2025-04-25-20-09-35.jpg', offsetX: 0, offsetY: 0 },
+      { name: 'Лимонный', image: 'https://i.postimg.cc/xCkFWG8S/photo-2025-04-25-20-09-36.jpg', offsetX: 0, offsetY: 0 },
+      { name: 'Фисташковый', image: 'https://i.postimg.cc/tgvMSvX5/photo-2025-04-25-20-09-38.jpg', offsetX: 0, offsetY: 0 },
+      { name: 'малиновый', image: 'https://i.postimg.cc/7h3T2VwQ/photo-2024-12-09-17-53-44.jpg', offsetX: 0, offsetY: 0 },
+      { name: 'Ореховый', image: 'https://i.postimg.cc/Kj6VCgFT/image.webp', offsetX: 0, offsetY: 0 }
+    ],
+    images: ['https://i.postimg.cc/qR9Z0t66/photo-2025-04-25-20-09-35.jpg'],
+    cartImage: 'https://i.postimg.cc/qR9Z0t66/photo-2025-04-25-20-09-35.jpg',
+    category: 'truffles'
+  },
+  {
+    id: '5',
+    name: 'Мадлен',
+    description: 'Нежные французские бисквитные печенья',
+    price: 80,
+    fillings: [
+      { name: 'Красный бархат с малиной', image: 'https://via.placeholder.com/300?text=Red+Velvet', offsetX: 0, offsetY: 0 },
+      { name: 'Шоколад-кофе-апельсин', image: 'https://via.placeholder.com/300?text=Choco+Coffee', offsetX: 0, offsetY: 0 },
+      { name: 'Фисташка-малина', image: 'https://via.placeholder.com/300?text=Pistachio+Raspberry', offsetX: 0, offsetY: 0 },
+      { name: 'Маковый лимон', image: 'https://via.placeholder.com/300?text=Poppy+Lemon', offsetX: 0, offsetY: 0 }
+    ],
+    images: ['https://via.placeholder.com/150?text=Madeleine1'],
+    cartImage: 'https://via.placeholder.com/150?text=Madeleine1',
+    category: 'madeleine'
+  }
+];
+// =============================================================================
+
+// элементы
+const els = {
+  productsGrid: document.getElementById('products-grid'),
+  productsCount: document.getElementById('products-count'),
+  detailContent: document.getElementById('detail-content'),
+  detailTitle: document.getElementById('detail-title'),
+  productDetail: document.getElementById('product-detail'),
+  cartBtn: document.getElementById('cart-btn'),
+  cartModal: document.getElementById('cart-modal'),
+  cartContent: document.getElementById('cart-content'),
+  cartCloseBtn: document.getElementById('cart-close-btn'),
+  cartBackBtn: document.getElementById('cart-back-btn'),
+  checkoutModal: document.getElementById('checkout-modal'),
+  checkoutDate: document.getElementById('checkout-date'),
+  checkoutTime: document.getElementById('checkout-time'),
+  checkoutPhone: document.getElementById('checkout-phone'),
+  checkoutTotal: document.getElementById('checkout-total'),
+  placeOrderBtn: document.getElementById('place-order-btn'),
+  checkoutClose: document.getElementById('checkout-close'),
+  checkoutBackBtn: document.getElementById('checkout-back-btn'),
+  cartBadge: document.getElementById('cart-btn') // unused visual badge omitted for brevity
+};
+
+// рендер списка товаров
+function renderProducts() {
+  els.productsCount.textContent = `${products.length} товаров`;
+  els.productsGrid.innerHTML = products.map(p => productCard(p)).join('');
+}
+
+// карточка товара
+function productCard(p) {
+  const price = p.sizes ? p.sizes[0].price : p.price;
+  return `
+    <div class="product-card bg-white rounded-lg shadow-sm flex flex-col relative cursor-pointer" data-id="${p.id}">
+      <div class="relative h-36 bg-gray-200 rounded-t-lg overflow-hidden">
+        <img src="${p.cartImage||p.images[0]||''}" class="w-full h-full object-cover" />
+        ${p.isHot ? '<div class="hot-badge">HOT</div>' : ''}
+      </div>
+      <div class="p-4 flex flex-col flex-grow">
+        <h3 class="font-semibold text-base mb-1">${escapeHtml(p.name)}</h3>
+        <p class="text-sm text-gray-600 line-clamp-2 mb-2 h-10">${escapeHtml(p.description||'')}</p>
+        <div class="mt-auto"><div class="font-bold text-pink-600">${price} ₽</div></div>
+      </div>
+    </div>
+  `;
+}
+
+// события
+function initEvents() {
+  // клик на карточке открывает деталь
+  els.productsGrid.addEventListener('click', e => {
+    const card = e.target.closest('.product-card');
+    if (!card) return;
+    openProductDetailById(card.dataset.id);
+  });
+  document.getElementById('detail-close-btn').addEventListener('click', closeProductDetail);
+  document.getElementById('detail-back-btn').addEventListener('click', closeProductDetail);
+  els.cartBtn.addEventListener('click', openCart);
+  els.cartCloseBtn.addEventListener('click', closeCart);
+  els.cartBackBtn.addEventListener('click', closeCart);
+  els.checkoutClose.addEventListener('click', closeCheckout);
+  els.checkoutBackBtn.addEventListener('click', closeCheckout);
+  els.placeOrderBtn.addEventListener('click', placeOrderFromCheckout);
+}
+
+// открыть деталь
+function openProductDetailById(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  appState.selectedProduct = p;
+  appState.selectedSize = p.sizes ? p.sizes[0].size : null;
+  appState.selectedFilling = (p.fillings && p.fillings[0]) ? p.fillings[0].name : null;
+  appState.detailQuantity = 1;
+  els.detailTitle.textContent = p.name;
+  els.productDetail.style.transform = 'translateY(0)';
+  renderProductDetail();
+}
+
+// закрыть деталь
+function closeProductDetail() { els.productDetail.style.transform = 'translateY(100%)'; }
+
+// рендер детали товара
+function renderProductDetail() {
+  const p = appState.selectedProduct;
+  if (!p) return;
+  const size = p.sizes ? p.sizes.find(s => s.size === appState.selectedSize) : null;
+  const price = size ? size.price : p.price;
+
+  // fillings UI (if present)
+  let fillingsHtml = '';
+  if (p.fillings && p.fillings.length) {
+    fillingsHtml = `
+      <div class="space-y-2">
+        <h3 class="font-semibold text-base">Начинка</h3>
+        <div class="grid grid-cols-2 gap-3 mb-2">
+          ${p.fillings.map(f => `<button class="filling-btn p-3 rounded-lg border text-center ${appState.selectedFilling===f.name?'bg-pink-50 border-pink-300':''}" data-filling="${escapeHtml(f.name)}">${escapeHtml(f.name)}</button>`).join('')}
         </div>
 
-        <div class="carousel">
-            <a href="#" class="active"><img src="https://i.postimg.cc/bJqQWjv5/photo-2025-03-18-15-18-14.jpg" alt="promo"></a>
-            <a href="#"><img src="https://i.postimg.cc/Z57qjBRv/feat-mac.jpg" alt="promo2"></a>
-            <div class="hot"></div>
-            <div class="carousel-dots"><div class="dot active"></div><div class="dot"></div></div>
+        <div class="filling-image-container" id="filling-container">
+          <!-- картинка начинки — позиция задаётся через offsetX/offsetY внутри products (в процентах) -->
+          <img id="filling-image" class="filling-image" src="${(p.fillings.find(f=>f.name===appState.selectedFilling)||p.fillings[0]).image}" alt="Начинка">
         </div>
+      </div>
+    `;
+  }
 
-        <div class="flex items-center justify-between my-5">
-            <h2 class="text-xl font-bold text-gray-800">Товары</h2>
-            <span id="products-count" class="text-sm text-gray-600">0 товаров</span>
-        </div>
-        <div id="products-grid" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 mb-10"></div>
-    </main>
-
-    <!-- cart modal -->
-    <div id="cart-modal" class="fixed inset-0 bg-white z-50 transform translate-y-full transition-transform duration-300">
-        <div class="flex flex-col h-full">
-            <div class="flex items-center justify-between p-4 border-b bg-white shadow-sm sticky top-0">
-                <button id="cart-back-btn">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                </button>
-                <h2 class="text-xl font-bold text-gray-800">Корзина</h2>
-                <button id="cart-close-btn">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <div id="cart-content" class="flex-grow flex flex-col"></div>
-        </div>
+  els.detailContent.innerHTML = `
+    <div class="product-image-carousel">
+      ${(p.images||[]).map((img,i)=>`<img src="${img}" class="${i===0?'active':''}">`).join('')}
+      <div class="product-image-dots">${(p.images||[]).map((_,i)=>`<div class="dot ${i===0?'active':''}"></div>`).join('')}</div>
     </div>
 
-    <!-- product detail modal -->
-    <div id="product-detail" class="fixed inset-0 bg-white z-50 transform translate-y-full transition-transform duration-300">
-        <div class="flex flex-col h-full">
-            <div class="flex items-center justify-between p-4 border-b bg-white shadow-sm sticky top-0">
-                <button id="detail-back-btn">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                </button>
-                <h2 id="detail-title" class="text-xl font-bold text-gray-800"></h2>
-                <button id="detail-close-btn">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <div id="detail-content" class="flex-1 overflow-auto p-4"></div>
+    <div class="space-y-4">
+      <h1 class="text-xl font-bold">${escapeHtml(p.name)}</h1>
+      ${p.sizes ? `<div><h3 class="font-semibold">Размер</h3><div class="grid grid-cols-3 gap-3">${p.sizes.map(s=>`<button class="size-btn p-3 border rounded ${appState.selectedSize===s.size?'bg-pink-50':''}" data-size="${s.size}">${s.size} (${s.diameter})<div class="text-xs text-gray-600">${s.weight} / ${s.price} ₽</div></button>`).join('')}</div></div>` : ''}
+      ${fillingsHtml}
+      <p class="text-gray-600 text-sm">${escapeHtml(p.description||'')}</p>
+
+      <div class="space-y-3 pt-3">
+        <div class="flex items-center justify-center gap-4">
+          <button id="detail-qty-dec" class="quantity-btn">-</button>
+          <span id="detail-quantity" class="font-semibold text-lg">${appState.detailQuantity}</span>
+          <button id="detail-qty-inc" class="quantity-btn">+</button>
         </div>
+        <button id="add-to-cart-detail" class="btn-primary w-full h-12 bg-pink-600 text-white rounded-lg">${price} ₽ — Добавить</button>
+      </div>
+    </div>
+  `;
+
+  // повесим обработчики
+  // size buttons
+  const sizeBtns = els.detailContent.querySelectorAll('.size-btn');
+  sizeBtns.forEach(b => b.addEventListener('click', () => {
+    const s = b.dataset.size; appState.selectedSize = s; renderProductDetail();
+  }));
+
+  // filling buttons
+  const fillingBtns = els.detailContent.querySelectorAll('.filling-btn');
+  fillingBtns.forEach(b => b.addEventListener('click', () => {
+    const f = b.dataset.filling;
+    appState.selectedFilling = f;
+    // обновляем src и позицию
+    const imgEl = document.getElementById('filling-image');
+    const fObj = p.fillings.find(ff => ff.name === f);
+    if (fObj) {
+      imgEl.src = fObj.image;
+      // применяем офсеты (берём поля offsetX, offsetY внутри объекта начинки)
+      const ox = (typeof fObj.offsetX === 'number') ? fObj.offsetX : 0;
+      const oy = (typeof fObj.offsetY === 'number') ? fObj.offsetY : 0;
+      imgEl.style.setProperty('--fx', (ox) + '%');
+      imgEl.style.setProperty('--fy', (oy) + '%');
+    }
+    // обновим active-класс кнопок
+    fillingBtns.forEach(btn => btn.classList.toggle('bg-pink-50 border-pink-300', btn.dataset.filling === f));
+  }));
+
+  // quantity
+  document.getElementById('detail-qty-dec').addEventListener('click', () => changeDetailQuantity(-1));
+  document.getElementById('detail-qty-inc').addEventListener('click', () => changeDetailQuantity(1));
+
+  // add to cart
+  document.getElementById('add-to-cart-detail').addEventListener('click', () => {
+    addToCart(p.id, appState.detailQuantity);
+    closeProductDetail();
+  });
+
+  // применим офсет для текущей выбранной начинки (при открытии)
+  const initialFilling = p.fillings && p.fillings.find(f => f.name === appState.selectedFilling) ? appState.selectedFilling : (p.fillings && p.fillings[0] && p.fillings[0].name);
+  if (initialFilling) {
+    const fObj = p.fillings.find(ff => ff.name === initialFilling);
+    const imgEl = document.getElementById('filling-image');
+    if (fObj && imgEl) {
+      const ox = (typeof fObj.offsetX === 'number') ? fObj.offsetX : 0;
+      const oy = (typeof fObj.offsetY === 'number') ? fObj.offsetY : 0;
+      imgEl.style.setProperty('--fx', (ox) + '%');
+      imgEl.style.setProperty('--fy', (oy) + '%');
+    }
+  }
+
+  // небольшой swipe для product images (не трогаем логику, просто базовый)
+  startProductImageCarouselInDetail();
+}
+
+// простой слайдер картинок в деталке (та же логика, что раньше)
+function startProductImageCarouselInDetail() {
+  const carousel = document.querySelector('.product-image-carousel');
+  if (!carousel) return;
+  const imgs = Array.from(carousel.querySelectorAll('img'));
+  const dots = Array.from(carousel.querySelectorAll('.dot'));
+  let idx = 0;
+  function show(i) {
+    imgs.forEach((im, j) => im.classList.toggle('active', j === i));
+    dots.forEach((d, j) => d.classList.toggle('active', j === i));
+    idx = i;
+  }
+  dots.forEach((d, i) => d.addEventListener('click', () => show(i)));
+  let sx = 0;
+  carousel.addEventListener('touchstart', e => { sx = e.touches[0].clientX; });
+  carousel.addEventListener('touchend', e => {
+    const ex = e.changedTouches[0].clientX;
+    const delta = sx - ex;
+    if (Math.abs(delta) > 40) {
+      if (delta > 0 && idx < imgs.length - 1) show(idx + 1);
+      else if (delta < 0 && idx > 0) show(idx - 1);
+    }
+  });
+  show(0);
+}
+
+// количество в детальной
+function changeDetailQuantity(delta) {
+  appState.detailQuantity = Math.max(1, (appState.detailQuantity || 1) + delta);
+  const el = document.getElementById('detail-quantity'); if (el) el.textContent = appState.detailQuantity;
+}
+
+// ========== CART minimal ==========
+function addToCart(productId, quantity = 1) {
+  const p = products.find(x => x.id === productId); if (!p) return;
+  const selSize = p.sizes ? appState.selectedSize : null;
+  const selFilling = p.fillings ? appState.selectedFilling : null;
+  const existing = appState.cart.find(i => String(i.id) === String(productId) && (i.selectedSize||'') === (selSize||'') && (i.selectedFilling||'') === (selFilling||''));
+  if (existing) existing.quantity += quantity;
+  else appState.cart.push({ id: p.id, name: p.name, price: p.price, selectedSize: selSize, selectedFilling: selFilling, quantity });
+  try { localStorage.setItem('cart', JSON.stringify(appState.cart)); } catch (e) {}
+  renderCart();
+}
+
+function openCart() { document.getElementById('cart-modal').style.transform = 'translateY(0)'; renderCart(); }
+function closeCart() { document.getElementById('cart-modal').style.transform = 'translateY(100%)'; }
+
+function renderCart() {
+  const c = appState.cart;
+  if (!c || c.length === 0) {
+    els.cartContent.innerHTML = `<div class="flex-1 flex flex-col items-center justify-center p-6"><p class="text-xl font-semibold">Корзина пуста</p><p class="text-sm text-gray-600">Добавьте вкусные десерты</p><button onclick="closeCart()" class="btn-primary mt-4 bg-pink-600 text-white rounded-lg p-3">Продолжить покупки</button></div>`;
+    return;
+  }
+  const total = c.reduce((s, i) => {
+    const prod = products.find(p => p.id === i.id);
+    const sizeObj = prod && prod.sizes ? prod.sizes.find(s=>s.size===i.selectedSize) : null;
+    const price = sizeObj ? sizeObj.price : (prod ? prod.price : i.price);
+    return s + price * i.quantity;
+  }, 0);
+
+  els.cartContent.innerHTML = `
+    <div class="cart-list">
+      ${c.map(item => {
+        const prod = products.find(p => p.id === item.id) || {};
+        const sizeObj = prod.sizes ? prod.sizes.find(s=>s.size===item.selectedSize) : null;
+        const price = sizeObj ? sizeObj.price : (prod.price||0);
+        const fillingText = item.selectedFilling ? `, ${item.selectedFilling}` : '';
+        return `<div class="flex gap-4 bg-white p-4 rounded-lg shadow-sm mb-3">
+          <div class="w-20 h-20 bg-gray-100 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden"><img src="${prod.cartImage||''}" class="w-full h-full object-cover"></div>
+          <div class="flex-1 min-w-0">
+            <div class="font-semibold">${item.name}${item.selectedSize?` (${item.selectedSize}${fillingText})`:''}</div>
+            <div class="text-pink-600 font-semibold">${price} ₽ × ${item.quantity} = ${price * item.quantity} ₽</div>
+            <div class="flex items-center justify-between mt-2">
+              <div class="flex items-center gap-3">
+                <button class="quantity-btn" onclick="updateCartQuantity('${item.id}', ${item.quantity - 1}, '${item.selectedSize||''}', '${item.selectedFilling||''}')">-</button>
+                <div class="w-8 text-center font-semibold">${item.quantity}</div>
+                <button class="quantity-btn" onclick="updateCartQuantity('${item.id}', ${item.quantity + 1}, '${item.selectedSize||''}', '${item.selectedFilling||''}')">+</button>
+              </div>
+              <button onclick="removeFromCart('${item.id}', '${item.selectedSize||''}', '${item.selectedFilling||''}')" class="text-red-500">Удалить</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
     </div>
 
-    <!-- checkout modal -->
-    <div id="checkout-modal" aria-hidden="true">
-        <div class="p-4 border-b flex items-start gap-3">
-            <div class="flex-1">
-                <h3 class="text-lg font-bold">Оформление заказа</h3>
-                <p class="text-sm text-gray-600">Самовывоз: <strong>Алексеева 43</strong></p>
-            </div>
-            <button id="checkout-close" class="text-gray-500">
-                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-        </div>
-        <div class="p-4 space-y-4">
-            <div class="grid grid-cols-1 gap-3">
-                <label class="text-sm font-semibold">Дата самовывоза</label>
-                <input id="checkout-date" type="date" class="input-field border rounded-lg p-3 text-sm w-full" min="" required>
-                <label class="text-sm font-semibold">Время</label>
-                <input id="checkout-time" type="time" class="input-field border rounded-lg p-3 text-sm w-full" min="09:00" max="21:00" required>
-                <label class="text-sm font-semibold">Телефон для связи</label>
-                <input id="checkout-phone" type="tel" placeholder="+7 (999) 123-45-67" class="input-field border rounded-lg p-3 text-sm w-full" required>
-            </div>
-
-            <div class="flex items-center justify-between font-bold text-base text-gray-800 pt-3 border-t">
-                <span>Итого</span><span id="checkout-total" class="text-pink-600">0 ₽</span>
-            </div>
-
-            <div class="space-y-2">
-                <button id="place-order-btn" class="btn-primary w-full h-12 bg-pink-600 text-white rounded-lg text-base font-semibold flex items-center justify-center gap-2 shadow-md">Оформить заказ</button>
-                <button id="checkout-back-btn" class="w-full h-12 border rounded-lg text-base">Вернуться к корзине</button>
-            </div>
-        </div>
+    <div class="border-t p-4 sticky bottom-0 bg-white">
+      <div class="flex justify-between items-center mb-3">
+        <div>Товаров: <strong>${c.length}</strong></div>
+        <div class="text-lg font-bold text-pink-600">${total} ₽</div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <button id="checkout-open-btn" class="col-span-2 bg-pink-600 text-white h-12 rounded-lg">Перейти к оформлению</button>
+        <button onclick="clearCart()" class="h-12 border rounded-lg">Очистить</button>
+        <button onclick="closeCart()" class="h-12 border rounded-lg">Продолжить покупки</button>
+      </div>
     </div>
+  `;
+  const checkoutBtn = document.getElementById('checkout-open-btn');
+  if (checkoutBtn) checkoutBtn.addEventListener('click', () => {
+    openCheckout();
+  });
+}
 
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>
-        AOS.init({ duration: 800, once: true, offset: 100 });
-        window.addEventListener('load', () => { AOS.refresh(); });
+function updateCartQuantity(productId, newQ, size, filling) {
+  const idx = appState.cart.findIndex(i => String(i.id) === String(productId) && (i.selectedSize||'') === (size||'') && (i.selectedFilling||'') === (filling||''));
+  if (idx === -1) return;
+  if (newQ <= 0) { removeFromCart(productId, size, filling); return; }
+  appState.cart[idx].quantity = newQ;
+  try { localStorage.setItem('cart', JSON.stringify(appState.cart)); } catch (e) {}
+  renderCart();
+}
+function removeFromCart(productId, size, filling) {
+  appState.cart = appState.cart.filter(i => !(String(i.id) === String(productId) && (i.selectedSize||'') === (size||'') && (i.selectedFilling||'') === (filling||'')));
+  try { localStorage.setItem('cart', JSON.stringify(appState.cart)); } catch (e) {}
+  renderCart();
+}
+function clearCart() { appState.cart = []; try { localStorage.setItem('cart', JSON.stringify(appState.cart)); } catch (e) {} renderCart(); }
 
-        if (typeof tsParticles !== 'undefined') {
-            tsParticles.load("tsparticles", {
-                fpsLimit: 60, particles: { number: { value: 150, density: { enable: true, value_area: 800 } }, color: { value: "#FF69B4" }, shape: { type: "circle" }, opacity: { value: 0.5, random: true }, size: { value: 2, random: { enable: true, minimumValue: 0.5 } }, move: { enable: true, speed: 0.5, direction: "none", random: true, outModes: { default: "out" } } }, interactivity: { events: { onHover: { enable: false } } }, detect_retina: true
-            });
-        }
+// ================= Checkout (минимально) =================
+function openCheckout() {
+  els.checkoutDate.min = new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0];
+  els.checkoutDate.value = els.checkoutDate.min;
+  updateCheckoutTotal();
+  document.getElementById('checkout-modal').classList.add('open');
+}
+function closeCheckout() { document.getElementById('checkout-modal').classList.remove('open'); }
+function updateCheckoutTotal() {
+  const t = appState.cart.reduce((s,i)=> {
+    const prod = products.find(p=>p.id===i.id);
+    const sizeObj = prod && prod.sizes ? prod.sizes.find(s=>s.size===i.selectedSize) : null;
+    const price = sizeObj ? sizeObj.price : (prod ? prod.price : 0);
+    return s + price * i.quantity;
+  },0);
+  document.getElementById('checkout-total').textContent = `${t} ₽`;
+}
+function placeOrderFromCheckout() {
+  if (!els.checkoutDate.value || !els.checkoutTime.value || !els.checkoutPhone.value) {
+    alert('Заполните все поля');
+    return;
+  }
+  if (!appState.cart.length) { alert('Корзина пуста'); return; }
+  // тут можно отправлять на сервер — пока минимально:
+  alert('Заказ оформлен. Спасибо!');
+  appState.cart = []; try { localStorage.setItem('cart', JSON.stringify(appState.cart)); } catch (e) {}
+  renderCart(); closeCheckout(); closeCart();
+}
 
-        if (window.Telegram?.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
-        }
+// утилиты
+function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-        const appState = {
-            cart: [], selectedProduct: null, selectedSize: 'S', selectedFilling: null, productImageIndex: 0, detailQuantity: 1
-        };
-
-        const products = [
-            { id: '1', name: 'Бенто-торт', description: 'Компактный торт с индивидуальным дизайном, идеальный для одного-двух человек', price: 1400, sizes: [{ size: 'S', diameter: '10 см', weight: '450-550 г', price: 1400 },{ size: 'M', diameter: '12 см', weight: '850-950 г', price: 2250 },{ size: 'L', diameter: '14 см', weight: '1.2-1.3 кг', price: 2750 }], fillings: [{ name: 'Маковый лимон с клубникой', image: 'https://i.postimg.cc/2S7kFCFG/image.webp' },{ name: 'Тропики манго-маракуйя', image: 'https://i.postimg.cc/nzCnJB8S/image.webp' },{ name: 'Пломбир малина-апельсин', image: 'https://i.postimg.cc/Kj6VCgFT/image.webp' },{ name: 'Медовик', image: 'https://i.postimg.cc/2S7kFCFG/image.webp' },{ name: 'Шоколадно-кофейный с крошкой Орео', image: 'https://i.postimg.cc/nzCnJB8S/image.webp' },{ name: 'Три шоколада', image: 'https://i.postimg.cc/2S7kFCFG/image.webp' },{ name: 'Морковный', image: 'https://i.postimg.cc/nzCnJB8S/image.webp' },{ name: 'Ореховый со сгущёнкой', image: 'https://i.postimg.cc/Kj6VCgFT/image.webp' }], images: ['https://i.postimg.cc/Wznctb7p/photo-2024-11-25-07-51-57.jpg', 'https://i.postimg.cc/MTjqdSmq/photo-2024-11-21-06-43-06.jpg', 'https://i.postimg.cc/7h3T2VwQ/photo-2024-12-09-17-53-44.jpg', 'https://i.postimg.cc/sfmjvqrC/photo-2024-12-09-18-02-26.jpg'], cartImage: 'https://i.postimg.cc/Wznctb7p/photo-2024-11-25-07-51-57.jpg', category: 'bento', isHot: true, volume: '450 г', ingredients: ['Бисквит ванильный', 'Крем сливочный', 'Фрукты свежие', 'Сахарная мастика'], included: 'В стоимость входит покрытие любого цвета, транспортировочная красивая коробка, лента и свечка.', extra: 'Дизайн, ягоды, фотопечать, цветы оплачиваются отдельно.' },
-            { id: '2', name: 'Моти', description: 'Нежные японские рисовые пирожные с начинкой', price: 100, images: ['https://i.postimg.cc/kXVgzs0r/photo-2024-11-25-07-59-12.jpg', 'https://i.postimg.cc/bwkNNJY3/photo-2024-11-25-07-59-11.jpg'], cartImage: 'https://i.postimg.cc/kXVgzs0r/photo-2024-11-25-07-59-12.jpg', category: 'mochi', isHot: true, volume: '1 шт', ingredients: ['Рисовая мука', 'Сливочная начинка', 'Фруктовое пюре'] },
-            { id: '3', name: 'Картошка', description: 'Классическое пирожное из бисквита и какао', price: 120, images: ['https://i.postimg.cc/yxGYW3Sr/photo-2024-11-25-08-45-29.jpg', 'https://i.postimg.cc/ZYsqw2DF/photo-2024-11-25-08-45-29-2.jpg', 'https://i.postimg.cc/xTW12HQX/photo-2024-11-25-08-45-30.jpg', 'https://i.postimg.cc/XvWNZbp3/photo-2024-11-25-08-45-30-2.jpg'], cartImage: 'https://i.postimg.cc/yxGYW3Sr/photo-2024-11-25-08-45-29.jpg', category: 'kartoshka', isHot: true, volume: '1 шт', ingredients: ['Бисквит шоколадный', 'Какао', 'Сгущенное молоко', 'Масло сливочное'] },
-            { id: '4', name: 'Трюфели', description: 'Шоколадные трюфели ручной работы с насыщенным вкусом', price: 150, images: ['https://i.postimg.cc/qR9Z0t66/photo-2025-04-25-20-09-35.jpg', 'https://i.postimg.cc/xCkFWG8S/photo-2025-04-25-20-09-36.jpg', 'https://i.postimg.cc/tgvMSvX5/photo-2025-04-25-20-09-38.jpg'], cartImage: 'https://i.postimg.cc/qR9Z0t66/photo-2025-04-25-20-09-35.jpg', category: 'truffles', isHot: false, volume: '100 г', ingredients: ['Темный шоколад', 'Сливки', 'Какао-порошок'] },
-            { id: '5', name: 'Мадлен', description: 'Нежные французские бисквитные печенья в форме ракушек', price: 80, images: ['https://via.placeholder.com/150?text=Madeleine1', 'https://via.placeholder.com/150?text=Madeleine2'], cartImage: 'https://via.placeholder.com/150?text=Madeleine1', category: 'madeleine', isHot: false, volume: '1 шт', ingredients: ['Пшеничная мука', 'Сливочное масло', 'Яйца', 'Сахар', 'Лимонная цедра'] }
-        ];
-
-        const elements = {
-            cartBtn: document.getElementById('cart-btn'),
-            cartBadge: document.getElementById('cart-badge'),
-            promoCarousel: document.querySelector('.carousel'),
-            productsGrid: document.getElementById('products-grid'),
-            productsCount: document.getElementById('products-count'),
-            cartModal: document.getElementById('cart-modal'),
-            cartBackBtn: document.getElementById('cart-back-btn'),
-            cartCloseBtn: document.getElementById('cart-close-btn'),
-            cartContent: document.getElementById('cart-content'),
-            productDetail: document.getElementById('product-detail'),
-            detailBackBtn: document.getElementById('detail-back-btn'),
-            detailCloseBtn: document.getElementById('detail-close-btn'),
-            detailTitle: document.getElementById('detail-title'),
-            detailContent: document.getElementById('detail-content'),
-            checkoutModal: document.getElementById('checkout-modal'),
-            checkoutClose: document.getElementById('checkout-close'),
-            checkoutBackBtn: document.getElementById('checkout-back-btn'),
-            placeOrderBtn: document.getElementById('place-order-btn'),
-            checkoutTotal: document.getElementById('checkout-total'),
-            checkoutDate: document.getElementById('checkout-date'),
-            checkoutTime: document.getElementById('checkout-time'),
-            checkoutPhone: document.getElementById('checkout-phone'),
-            placeOrderBtnElement: document.getElementById('place-order-btn')
-        };
-
-        function initEventListeners() {
-            elements.cartBtn.addEventListener('click', openCart);
-            elements.cartBackBtn.addEventListener('click', closeCart);
-            elements.cartCloseBtn.addEventListener('click', closeCart);
-            elements.detailBackBtn.addEventListener('click', closeProductDetail);
-            elements.detailCloseBtn.addEventListener('click', closeProductDetail);
-            elements.checkoutClose.addEventListener('click', closeCheckout);
-            elements.checkoutBackBtn.addEventListener('click', closeCheckout);
-            elements.placeOrderBtn.addEventListener('click', placeOrderFromCheckout);
-            startCarousel();
-        }
-
-        function startCarousel() {
-            const slides = elements.promoCarousel.querySelectorAll('a');
-            const dots = elements.promoCarousel.querySelectorAll('.dot');
-            let currentIndex = 0;
-            function showSlide(index) {
-                slides.forEach((s, i) => s.classList.toggle('active', i === index));
-                dots.forEach((d, i) => d.classList.toggle('active', i === index));
-                currentIndex = index;
-            }
-            setInterval(() => showSlide((currentIndex + 1) % slides.length), 3000);
-            showSlide(currentIndex);
-        }
-
-        /* Product image carousel with swipe */
-        function startProductImageCarousel() {
-            const carousel = elements.detailContent.querySelector('.product-image-carousel');
-            if (!carousel) return;
-            const images = Array.from(carousel.querySelectorAll('img'));
-            const dotsContainer = elements.detailContent.querySelector('.product-image-dots');
-            if (!dotsContainer) return;
-            const dots = Array.from(dotsContainer.querySelectorAll('.dot'));
-            let currentIndex = (typeof appState.productImageIndex === 'number') ? appState.productImageIndex : 0;
-            let startX = 0;
-            let isPointerDown = false;
-
-            function showImage(index) {
-                index = Math.max(0, Math.min(images.length - 1, index));
-                images.forEach((img, i) => {
-                    img.classList.toggle('active', i === index);
-                    img.style.transform = (i === index) ? 'translateX(0)' : (i < index ? 'translateX(-6%)' : 'translateX(6%)');
-                });
-                dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
-                currentIndex = index;
-                appState.productImageIndex = index;
-            }
-
-            dots.forEach((dot, i) => dot.addEventListener('click', () => showImage(i)));
-
-            carousel.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; isPointerDown = true; });
-            carousel.addEventListener('touchend', (e) => {
-                if (!isPointerDown) return;
-                const endX = e.changedTouches[0].clientX;
-                const deltaX = startX - endX;
-                if (Math.abs(deltaX) > 40) {
-                    if (deltaX > 0 && currentIndex < images.length - 1) showImage(currentIndex + 1);
-                    else if (deltaX < 0 && currentIndex > 0) showImage(currentIndex - 1);
-                }
-                isPointerDown = false;
-            });
-
-            carousel.addEventListener('mousedown', (e) => { startX = e.clientX; isPointerDown = true; e.preventDefault(); });
-            window.addEventListener('mouseup', (e) => {
-                if (!isPointerDown) return;
-                const endX = e.clientX;
-                const deltaX = startX - endX;
-                if (Math.abs(deltaX) > 40) {
-                    if (deltaX > 0 && currentIndex < images.length - 1) showImage(currentIndex + 1);
-                    else if (deltaX < 0 && currentIndex > 0) showImage(currentIndex - 1);
-                }
-                isPointerDown = false;
-            });
-
-            showImage(currentIndex);
-        }
-
-        function openCart() { elements.cartModal.style.transform = 'translateY(0)'; renderCart(); }
-        function closeCart() { elements.cartModal.style.transform = 'translateY(100%)'; }
-
-        function normalizeKey(val) { return val == null ? '' : String(val); }
-
-        function addToCartById(productId, quantity = 1) {
-            const product = products.find(p => p.id === productId); if (!product) return;
-            appState.selectedSize = product.sizes ? appState.selectedSize || 'S' : null;
-            appState.selectedFilling = product.fillings ? appState.selectedFilling || product.fillings[0].name : null;
-            const existingItem = appState.cart.find(item => String(item.id) === String(product.id) && normalizeKey(item.selectedSize) === normalizeKey(appState.selectedSize) && normalizeKey(item.selectedFilling) === normalizeKey(appState.selectedFilling));
-            if (existingItem) { existingItem.quantity += quantity; } else { appState.cart.push({ ...product, quantity, selectedSize: appState.selectedSize, selectedFilling: appState.selectedFilling }); }
-            try { localStorage.setItem('cart', JSON.stringify(appState.cart)); } catch (e) { console.error('LocalStorage set error', e); }
-            updateCartBadge();
-            showNotification(`${product.name} добавлен в корзину`, 'success');
-        }
-
-        function updateCartQuantity(productId, newQuantity, size, filling) {
-            const item = appState.cart.find(i => String(i.id) === String(productId) && normalizeKey(i.selectedSize) === normalizeKey(size) && normalizeKey(i.selectedFilling) === normalizeKey(filling));
-            if (!item) return;
-            if (newQuantity <= 0) { removeFromCart(productId, size, filling); return; }
-            item.quantity = newQuantity;
-            try { localStorage.setItem('cart', JSON.stringify(appState.cart)); } catch (e) { console.error(e); }
-            updateCartBadge();
-            renderCart();
-        }
-
-        function removeFromCart(productId, size, filling) {
-            appState.cart = appState.cart.filter(item => !(String(item.id) === String(productId) && normalizeKey(item.selectedSize) === normalizeKey(size) && normalizeKey(item.selectedFilling) === normalizeKey(filling)));
-            try { localStorage.setItem('cart', JSON.stringify(appState.cart)); } catch (e) { console.error(e); }
-            updateCartBadge();
-            renderCart();
-        }
-
-        function clearCart() { appState.cart = []; try { localStorage.setItem('cart', JSON.stringify(appState.cart)); } catch (e) {} updateCartBadge(); renderCart(); }
-        function updateCartBadge() { const totalItems = appState.cart.reduce((sum, item) => sum + (item.quantity || 0), 0); elements.cartBadge.textContent = totalItems; elements.cartBadge.classList.toggle('hidden', totalItems === 0); }
-        function getMinOrderDate() { const today = new Date(); today.setDate(today.getDate() + 1); return today.toISOString().split('T')[0]; }
-
-        function renderCart() {
-            const cartContent = elements.cartContent;
-            const hasBento = appState.cart.some(item => item.category === 'bento');
-            const totalAmount = appState.cart.reduce((sum, item) => {
-                const product = products.find(p => p.id === item.id); const size = product && product.sizes ? product.sizes.find(s => s.size === item.selectedSize) : null; return sum + (size ? size.price : item.price) * item.quantity;
-            }, 0);
-
-            if (appState.cart.length === 0) {
-                cartContent.innerHTML = `<div class="flex-1 flex flex-col items-center justify-center text-center p-6">
-                    <svg class="w-20 h-20 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z"/></svg>
-                    <p class="text-xl font-semibold text-gray-800">Корзина пуста</p><p class="text-sm text-gray-600">Добавьте вкусные десерты</p>
-                    <button onclick="closeCart()" class="btn-primary mt-4 bg-pink-600 text-white rounded-lg p-3 text-base font-semibold shadow-md">Продолжить покупки</button>
-                </div>`;
-                return;
-            }
-
-            cartContent.innerHTML = `
-                <div class="cart-list">
-                    ${appState.cart.map(item => {
-                        const product = products.find(p => p.id === item.id) || {};
-                        const size = product.sizes ? product.sizes.find(s => s.size === item.selectedSize) : null;
-                        const price = size ? size.price : item.price;
-                        const fillingText = item.selectedFilling ? `, ${item.selectedFilling}` : '';
-                        return `<div class="cart-item animate-fade-in flex gap-4 bg-white p-4 rounded-lg shadow-sm mb-3">
-                            <img src="${item.cartImage || 'https://via.placeholder.com/150?text=Placeholder'}" alt="${item.name}" class="w-20 h-20 object-cover rounded-lg flex-shrink-0">
-                            <div class="flex-1 min-w-0">
-                                <h4 class="line-clamp-1 mb-1 font-semibold text-base text-gray-800">${item.name}${item.selectedSize ? ` (${item.selectedSize}${fillingText})` : ''}</h4>
-                                <p class="text-sm text-pink-600 font-semibold mb-2">${price} ₽ × ${item.quantity} = ${price * item.quantity} ₽</p>
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <button class="quantity-btn" onclick="updateCartQuantity('${item.id}', ${item.quantity - 1}, '${item.selectedSize ?? ''}', '${item.selectedFilling ?? ''}')">-</button>
-                                        <span class="w-8 text-center font-semibold text-base">${item.quantity}</span>
-                                        <button class="quantity-btn" onclick="updateCartQuantity('${item.id}', ${item.quantity + 1}, '${item.selectedSize ?? ''}', '${item.selectedFilling ?? ''}')">+</button>
-                                    </div>
-                                    <button onclick="removeFromCart('${item.id}', '${item.selectedSize ?? ''}', '${item.selectedFilling ?? ''}')" class="p-2 text-red-500 hover:bg-red-50 rounded-lg">
-                                        <svg class="icon w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>`; }).join('')}
-                </div>
-                <div class="border-t bg-white p-4 sticky bottom-0">
-                    <div class="flex justify-between items-center mb-3">
-                        <div>
-                            <div class="text-sm text-gray-600">Товаров: <strong>${appState.cart.length}</strong></div>
-                            ${hasBento ? `<div class="text-sm text-red-600 mt-1">В корзине есть бенто — дизайн рассчитывается менеджером.</div>` : ''}
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm text-gray-600">Итого</div>
-                            <div class="text-lg font-bold text-pink-600">${totalAmount} ₽</div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button id="checkout-open-btn" class="btn-primary col-span-2 w-full h-12 bg-pink-600 text-white rounded-lg text-base font-semibold shadow-md">Перейти к оформлению</button>
-                        <button onclick="clearCart()" class="col-span-1 w-full h-12 border rounded-lg">Очистить</button>
-                        <button onclick="closeCart()" class="col-span-1 w-full h-12 border rounded-lg">Продолжить покупки</button>
-                    </div>
-                </div>`;
-            const checkoutBtn = document.getElementById('checkout-open-btn');
-            if (checkoutBtn) {
-                checkoutBtn.addEventListener('click', () => {
-                    openCheckout();
-                });
-            }
-        }
-
-        function openProductDetailById(productId) {
-            const product = products.find(p => p.id === productId); if (!product) return;
-            appState.selectedProduct = product; appState.selectedSize = product.sizes ? 'S' : null; appState.selectedFilling = product.fillings ? product.fillings[0].name : null; appState.productImageIndex = 0; appState.detailQuantity = 1;
-            elements.detailTitle.textContent = product.name; elements.productDetail.style.transform = 'translateY(0)';
-            renderProductDetail();
-        }
-
-        function closeProductDetail() { elements.productDetail.style.transform = 'translateY(100%)'; appState.detailQuantity = 1; }
-        function selectSize(size) { appState.selectedSize = size; renderProductDetail(); }
-        function selectFilling(filling) { appState.selectedFilling = filling; renderProductDetail(); }
-
-        function renderProductDetail() {
-            if (!appState.selectedProduct) return;
-            const product = appState.selectedProduct; const size = product.sizes ? product.sizes.find(s => s.size === appState.selectedSize) : null; const price = size ? size.price : product.price;
-            elements.detailContent.innerHTML = `<div class="product-image-carousel">${product.images.map((img, i) => `<img src="${img}" alt="${product.name}" class="${i === 0 ? 'active' : ''}">`).join('')}<div class="product-image-dots">${product.images.map((_, i) => `<div class="dot ${i === 0 ? 'active' : ''}"></div>`).join('')}</div></div>
-                <div class="space-y-4"><h1 class="text-xl font-bold text-gray-800">${product.name}</h1>
-                    ${product.sizes ? `<div class="space-y-2"><h3 class="font-semibold text-base text-gray-800">Размер</h3><div class="grid grid-cols-3 gap-3">${product.sizes.map(s => `<button class="size-btn p-3 rounded-lg border ${appState.selectedSize === s.size ? 'active border-pink-300 bg-pink-50' : 'hover:border-pink-300'} text-left shadow-sm" onclick="selectSize('${s.size}')"><div class="font-semibold text-sm">${s.size} (${s.diameter})</div><div class="text-xs text-gray-600">${s.weight} / ${s.price} ₽</div></button>`).join('')}</div><p class="text-sm text-gray-600">${product.included}</p><p class="text-sm text-gray-600">${product.extra}</p></div>` : ''}
-                    ${product.fillings ? `<div class="space-y-2"><h3 class="font-semibold text-base text-gray-800">Начинка</h3><div class="grid grid-cols-2 gap-3">${product.fillings.map(f => `<button class="filling-btn p-3 rounded-lg border text-center ${appState.selectedFilling === f.name ? 'active border-pink-300 bg-pink-50' : 'hover:border-pink-300'} shadow-sm" onclick="selectFilling('${f.name}')"><div class="font-semibold text-sm">${f.name}</div></button>`).join('')}</div><div class="mt-2 filling-image-container"><img id="filling-image" src="${product.fillings.find(f => f.name === appState.selectedFilling).image}" alt="Начинка ${appState.selectedFilling}" class="filling-image"></div></div>` : ''}
-                    <div><p class="text-gray-600 text-sm">${product.description}</p></div>
-                    <div class="space-y-2"><button class="flex items-center justify-between w-full py-2 text-left" onclick="toggleIngredients()"><span class="font-semibold text-base text-gray-800">Состав</span><svg id="ingredients-chevron" class="icon w-5 h-5 transition-transform" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button><div id="ingredients-list" class="space-y-1 hidden animate-fade-in">${product.ingredients ? product.ingredients.map(ing => `<div class="text-sm text-gray-600">• ${ing}</div>`).join('') : '<div class="text-sm text-gray-600">Состав отсутствует</div>'}</div></div>
-                    <div class="space-y-3 pt-3"><div class="flex items-center justify-center gap-4"><button class="quantity-btn" onclick="changeDetailQuantity(-1)">-</button><span id="detail-quantity" class="font-semibold text-lg">${appState.detailQuantity || 1}</span><button class="quantity-btn" onclick="changeDetailQuantity(1)">+</button></div><button onclick="addToCartFromDetail()" class="btn-primary w-full h-12 bg-pink-600 text-white rounded-lg text-base font-semibold shadow-md">Добавить <span id="detail-total-price">${price}</span> ₽</button></div>
-                </div>`;
-            startProductImageCarousel();
-        }
-
-        function renderProducts() {
-            elements.productsCount.textContent = `${products.length} товаров`;
-            elements.productsGrid.innerHTML = products.map(renderProductCard).join('');
-        }
-
-        function renderProductCard(product) {
-            const price = product.sizes ? product.sizes.find(s => s.size === 'S').price : product.price;
-            return `
-                <div class="product-card bg-white rounded-lg shadow-sm flex flex-col relative" onclick="openProductDetailById('${product.id}')">
-                    <div class="relative h-36 bg-gray-200 rounded-t-lg overflow-hidden cursor-pointer">
-                        <img src="${product.cartImage || product.images[0]}" alt="${product.name}" class="w-full h-full object-cover">
-                        ${product.isHot ? `<div class="hot-badge">HOT</div>` : ''}
-                    </div>
-                    <div class="p-4 flex flex-col flex-grow">
-                        <h3 class="font-semibold text-base line-clamp-1 mb-1 text-gray-800">${product.name}</h3>
-                        <p class="text-sm text-gray-600 line-clamp-2 mb-2 h-10">${product.description}</p>
-                        <div class="flex items-center justify-between mt-auto pt-2">
-                            <div class="flex flex-col">
-                                <span class="font-bold text-base text-pink-600">${price} ₽</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="addToCartById('${product.id}'); event.stopPropagation();" class="add-to-cart-btn">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                    </button>
-                </div>`;
-        }
-
-        function showNotification(message, type = 'success') {
-            const notification = document.createElement('div');
-            notification.className = `fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-lg text-white font-semibold animate-zoom-in shadow-lg ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 4000);
-        }
-
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) { const later = () => { clearTimeout(timeout); func(...args); }; clearTimeout(timeout); timeout = setTimeout(later, wait); };
-        }
-
-        function openCheckout() {
-            elements.checkoutDate.min = getMinOrderDate();
-            elements.checkoutDate.value = getMinOrderDate();
-            updateCheckoutTotal();
-            elements.checkoutModal.classList.add('open');
-            elements.checkoutModal.setAttribute('aria-hidden', 'false');
-            const telegram = window.Telegram?.WebApp;
-            const user = telegram?.initDataUnsafe?.user || {};
-            if (user.phone_number && !elements.checkoutPhone.value) elements.checkoutPhone.value = user.phone_number;
-        }
-        function closeCheckout() {
-            elements.checkoutModal.classList.remove('open');
-            elements.checkoutModal.setAttribute('aria-hidden', 'true');
-        }
-        function updateCheckoutTotal() {
-            const totalAmount = appState.cart.reduce((sum, item) => {
-                const product = products.find(p => p.id === item.id);
-                const size = product && product.sizes ? product.sizes.find(s => s.size === item.selectedSize) : null;
-                return sum + (size ? size.price : item.price) * item.quantity;
-            }, 0);
-            elements.checkoutTotal.textContent = `${totalAmount} ₽`;
-        }
-
-        function placeOrderFromCheckout() { placeOrder(); }
-
-        function placeOrder() {
-            const checkoutButton = elements.placeOrderBtnElement;
-            const dateInput = elements.checkoutDate;
-            const timeInput = elements.checkoutTime;
-            const phoneInput = elements.checkoutPhone;
-
-            if (!dateInput.value || !timeInput.value || !phoneInput.value) {
-                showNotification('Заполните все поля', 'error');
-                return;
-            }
-            if (appState.cart.length === 0) {
-                showNotification('Корзина пуста', 'error');
-                return;
-            }
-
-            checkoutButton.disabled = true;
-            checkoutButton.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Заказ формируется...`;
-
-            const totalAmount = appState.cart.reduce((sum, item) => {
-                const product = products.find(p => p.id === item.id);
-                const size = product && product.sizes ? product.sizes.find(s => s.size === item.selectedSize) : null;
-                return sum + (size ? size.price : item.price) * item.quantity;
-            }, 0);
-
-            const telegram = window.Telegram?.WebApp;
-            const user = telegram?.initDataUnsafe?.user || {};
-            const orderData = {
-                event: 'order_submit',
-                user_id: user.id || 'unknown',
-                username: user.username || '',
-                first_name: user.first_name || '',
-                last_name: user.last_name || '',
-                timestamp: new Date().toISOString(),
-                url: window.location.href,
-                userAgent: navigator.userAgent,
-                additional: {
-                    order_id: `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                    order_details: appState.cart.map(item => ({ id: item.id, name: item.name, price: products.find(p => p.id === item.id).sizes ? products.find(p => p.id === item.id).sizes.find(s => s.size === item.selectedSize).price : item.price, quantity: item.quantity, size: item.selectedSize, filling: item.selectedFilling || null })),
-                    total_amount: totalAmount,
-                    delivery_type: 'pickup',
-                    delivery_fee: 0,
-                    final_amount: totalAmount,
-                    date: dateInput.value,
-                    time: timeInput.value,
-                    address: 'Алексеева 43',
-                    phone: phoneInput.value
-                }
-            };
-
-            fetch('https://script.google.com/macros/s/AKfycbyAq2_5piTuUqFu4FxAc1I-3I31nS6SBFxbZVDDbkIPgKyqT3QdcdxjPX8QXIcgjnpS-g/exec', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(orderData), mode: 'no-cors'
-            })
-            .then(() => {
-                showNotification('Заказ успешно оформлен! Ожидайте подтверждения. Оплата наличными.', 'success');
-                clearCart();
-                closeCheckout();
-                closeCart();
-                checkoutButton.disabled = false;
-                checkoutButton.textContent = 'Оформить заказ';
-            })
-            .catch(error => {
-                console.error('Error sending order:', error);
-                showNotification('Ошибка при отправке заказа', 'error');
-                checkoutButton.disabled = false;
-                checkoutButton.textContent = 'Оформить заказ';
-            });
-        }
-
-        function changeDetailQuantity(change) {
-            appState.detailQuantity = Math.max(1, (appState.detailQuantity || 1) + change);
-            const el = document.getElementById('detail-quantity');
-            if (el) el.textContent = appState.detailQuantity;
-            if (appState.selectedProduct) {
-                const size = appState.selectedProduct.sizes ? appState.selectedProduct.sizes.find(s => s.size === appState.selectedSize) : null;
-                const price = size ? size.price : appState.selectedProduct.price;
-                const totalPriceEl = document.getElementById('detail-total-price');
-                if (totalPriceEl) totalPriceEl.textContent = price * appState.detailQuantity;
-            }
-        }
-
-        function addToCartFromDetail() { if (appState.selectedProduct) { addToCartById(appState.selectedProduct.id, appState.detailQuantity || 1); closeProductDetail(); } }
-        function toggleIngredients() { const list = document.getElementById('ingredients-list'); const chevron = document.getElementById('ingredients-chevron'); list.classList.toggle('hidden'); chevron.classList.toggle('rotate-180'); }
-
-        function init() {
-            const savedCart = localStorage.getItem('cart');
-            if (savedCart) {
-                try {
-                    const parsedCart = JSON.parse(savedCart);
-                    if (Array.isArray(parsedCart)) appState.cart = parsedCart;
-                } catch (e) { console.error('Could not parse cart from localStorage'); }
-            }
-            initEventListeners();
-            renderProducts();
-            updateCartBadge();
-        }
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+// init
+document.addEventListener('DOMContentLoaded', () => {
+  // restore cart if present
+  try { const c = localStorage.getItem('cart'); if (c) appState.cart = JSON.parse(c); } catch(e){}
+  renderProducts(); initEvents();
+  // if there is saved cart, render badge
+  renderCart();
+});
+</script>
 </body>
 </html>
