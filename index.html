@@ -105,6 +105,50 @@
             transition: background .3s;
         }
         .carousel-dots .dot.active { background: #d5fd02; }
+        .product-image-carousel {
+            position: relative;
+            width: 100%;
+            height: 288px;
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            touch-action: pan-x;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            border-radius: 12px;
+            background: #e5e7eb;
+            margin-bottom: 16px;
+        }
+        .product-image-carousel::-webkit-scrollbar {
+            display: none;
+        }
+        .product-image-carousel img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            flex-shrink: 0;
+            scroll-snap-align: center;
+        }
+        .product-image-dots {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+            z-index: 2;
+        }
+        .product-image-dots .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: background .3s;
+        }
+        .product-image-dots .dot.active { background: #ffffff; }
         .cart-modal, .product-detail {
             height: 100dvh;
             max-height: 100dvh;
@@ -384,7 +428,9 @@
             cart: [],
             selectedProduct: null,
             selectedSize: 'S',
-            selectedFilling: null
+            selectedFilling: null,
+            productImageIndex: 0,
+            userInteracted: false
         };
 
         const products = [
@@ -408,7 +454,13 @@
                     { name: 'Морковный', image: 'https://i.postimg.cc/nzCnJB8S/image.webp?text=Морковный' },
                     { name: 'Ореховый со сгущёнкой', image: 'https://i.postimg.cc/Kj6VCgFT/image.webp?text=Ореховый+со+сгущёнкой' }
                 ],
-                image: 'https://i.postimg.cc/Wznctb7p/photo-2024-11-25-07-51-57.jpg',
+                images: [
+                    'https://i.postimg.cc/Wznctb7p/photo-2024-11-25-07-51-57.jpg',
+                    'https://i.postimg.cc/MTjqdSmq/photo-2024-11-21-06-43-06.jpg',
+                    'https://i.postimg.cc/7h3T2VwQ/photo-2024-12-09-17-53-44.jpg',
+                    'https://i.postimg.cc/sfmjvqrC/photo-2024-12-09-18-02-26.jpg',
+                    'https://images.unsplash.com/photo-1578985545061-5e7a6e8e7406?w=400&h=300&fit=crop'
+                ],
                 category: 'bento',
                 isNew: true,
                 discount: 10,
@@ -422,7 +474,13 @@
                 name: 'Моти',
                 description: 'Нежные японские рисовые пирожные с начинкой',
                 price: 100,
-                image: 'https://images.unsplash.com/photo-1629637727847-6d1a1b34a6d?w=400&h=300&fit=crop',
+                images: [
+                    'https://i.postimg.cc/kXVgzs0r/photo-2024-11-25-07-59-12.jpg',
+                    'https://i.postimg.cc/bwkNNJY3/photo-2024-11-25-07-59-11.jpg',
+                    'https://via.placeholder.com/400x300?text=Моти+3',
+                    'https://via.placeholder.com/400x300?text=Моти+4',
+                    'https://via.placeholder.com/400x300?text=Моти+5'
+                ],
                 category: 'mochi',
                 isNew: false,
                 volume: '1 шт',
@@ -433,7 +491,13 @@
                 name: 'Картошка',
                 description: 'Классическое пирожное из бисквита и какао',
                 price: 120,
-                image: 'https://images.unsplash.com/photo-1599785209779-3154b9b341c2?w=400&h=300&fit=crop',
+                images: [
+                    'https://i.postimg.cc/yxGYW3Sr/photo-2024-11-25-08-45-29.jpg',
+                    'https://i.postimg.cc/ZYsqw2DF/photo-2024-11-25-08-45-29-2.jpg',
+                    'https://i.postimg.cc/xTW12HQX/photo-2024-11-25-08-45-30.jpg',
+                    'https://i.postimg.cc/XvWNZbp3/photo-2024-11-25-08-45-30-2.jpg',
+                    'https://via.placeholder.com/400x300?text=Картошка+5'
+                ],
                 category: 'kartoshka',
                 isNew: false,
                 volume: '1 шт',
@@ -444,7 +508,13 @@
                 name: 'Трюфели',
                 description: 'Шоколадные трюфели ручной работы с насыщенным вкусом',
                 price: 150,
-                image: 'https://images.unsplash.com/photo-1606092195730-6d7a61b784f8?w=400&h=300&fit=crop',
+                images: [
+                    'https://images.unsplash.com/photo-1606092195730-6d7a61b784f8?w=400&h=300&fit=crop',
+                    'https://via.placeholder.com/400x300?text=Трюфели+2',
+                    'https://via.placeholder.com/400x300?text=Трюфели+3',
+                    'https://via.placeholder.com/400x300?text=Трюфели+4',
+                    'https://via.placeholder.com/400x300?text=Трюфели+5'
+                ],
                 category: 'truffles',
                 isNew: true,
                 discount: 5,
@@ -456,7 +526,13 @@
                 name: 'Мадлен',
                 description: 'Нежные французские бисквитные печенья в форме ракушек',
                 price: 80,
-                image: 'https://images.unsplash.com/photo-1619982440547-4e58f3c3ebfa?w=400&h=300&fit=crop',
+                images: [
+                    'https://images.unsplash.com/photo-1619982440547-4e58f3c3ebfa?w=400&h=300&fit=crop',
+                    'https://via.placeholder.com/400x300?text=Мадлен+2',
+                    'https://via.placeholder.com/400x300?text=Мадлен+3',
+                    'https://via.placeholder.com/400x300?text=Мадлен+4',
+                    'https://via.placeholder.com/400x300?text=Мадлен+5'
+                ],
                 category: 'madeleine',
                 isNew: false,
                 volume: '1 шт',
@@ -479,7 +555,8 @@
             cartTotalBadge: document.getElementById('cart-total-badge'),
             productDetail: document.getElementById('product-detail'),
             detailBackBtn: document.getElementById('detail-back-btn'),
-            detailTitle: document.getElementById('detail-back-btn'),
+            detailCloseBtn: document.getElementById('detail-close-btn'),
+            detailTitle: document.getElementById('detail-title'),
             detailContent: document.getElementById('detail-content')
         };
 
@@ -488,6 +565,7 @@
             elements.cartBackBtn.addEventListener('click', closeCart);
             elements.cartCloseBtn.addEventListener('click', closeCart);
             elements.detailBackBtn.addEventListener('click', closeProductDetail);
+            elements.detailCloseBtn.addEventListener('click', closeProductDetail);
 
             elements.promoCarousel.addEventListener('wheel', (e) => {
                 e.preventDefault();
@@ -520,6 +598,85 @@
 
             setInterval(nextSlide, 3000);
             showSlide(currentIndex);
+        }
+
+        function startProductImageCarousel() {
+            const carousel = elements.detailContent.querySelector('.product-image-carousel');
+            if (!carousel) return;
+            const images = carousel.querySelectorAll('img');
+            const dots = carousel.querySelectorAll('.product-image-dots .dot');
+            let currentIndex = appState.productImageIndex;
+            let intervalId = null;
+
+            function showImage(index) {
+                images.forEach((img, i) => {
+                    img.classList.toggle('active', i === index);
+                });
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === index);
+                });
+                carousel.scrollLeft = index * carousel.offsetWidth;
+                appState.productImageIndex = index;
+            }
+
+            function startAutoSlide() {
+                if (!appState.userInteracted) {
+                    intervalId = setInterval(() => {
+                        currentIndex = (currentIndex + 1) % images.length;
+                        showImage(currentIndex);
+                    }, 3000);
+                }
+            }
+
+            function stopAutoSlide() {
+                appState.userInteracted = true;
+                if (intervalId) {
+                    clearInterval(intervalId);
+                    intervalId = null;
+                }
+            }
+
+            dots.forEach((dot, i) => {
+                dot.addEventListener('click', () => {
+                    stopAutoSlide();
+                    showImage(i);
+                });
+            });
+
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            carousel.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+            });
+
+            carousel.addEventListener('touchmove', (e) => {
+                touchEndX = e.touches[0].clientX;
+            });
+
+            carousel.addEventListener('touchend', () => {
+                const deltaX = touchStartX - touchEndX;
+                if (Math.abs(deltaX) > 50) {
+                    stopAutoSlide();
+                    if (deltaX > 0 && currentIndex < images.length - 1) {
+                        currentIndex++;
+                    } else if (deltaX < 0 && currentIndex > 0) {
+                        currentIndex--;
+                    }
+                    showImage(currentIndex);
+                }
+            });
+
+            carousel.addEventListener('scroll', () => {
+                const index = Math.round(carousel.scrollLeft / carousel.offsetWidth);
+                if (index !== currentIndex) {
+                    currentIndex = index;
+                    showImage(index);
+                }
+            });
+
+            showImage(currentIndex);
+            startAutoSlide();
         }
 
         function openCart() {
@@ -632,7 +789,7 @@
                         const price = size ? size.price : item.price;
                         return `
                             <div class="cart-item animate-fade-in flex gap-4 bg-white p-4 rounded-lg shadow-sm">
-                                <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded-lg flex-shrink-0">
+                                <img src="${item.images[0]}" alt="${item.name}" class="w-20 h-20 object-cover rounded-lg flex-shrink-0">
                                 <div class="flex-1 min-w-0">
                                     <h4 class="line-clamp-1 mb-1 font-semibold text-base text-gray-800">${item.name}${item.selectedSize ? ` (${item.selectedSize}${item.selectedFilling ? ', ' + item.selectedFilling : ''})` : ''}</h4>
                                     <p class="text-sm text-pink-600 font-semibold mb-2">
@@ -725,10 +882,13 @@
             appState.selectedProduct = product;
             appState.selectedSize = product.sizes ? 'S' : null;
             appState.selectedFilling = product.fillings ? product.fillings[0].name : null;
+            appState.productImageIndex = 0;
+            appState.userInteracted = false;
             elements.detailTitle.textContent = product.name;
             elements.productDetail.classList.add('open');
             elements.productDetail.style.transform = 'translateY(0)';
             renderProductDetail();
+            startProductImageCarousel();
         }
 
         function closeProductDetail() {
@@ -737,6 +897,8 @@
             appState.selectedProduct = null;
             appState.selectedSize = 'S';
             appState.selectedFilling = null;
+            appState.productImageIndex = 0;
+            appState.userInteracted = false;
             detailQuantity = 1;
         }
 
@@ -758,14 +920,21 @@
             const discountedPrice = product.discount ? Math.round(price * (1 - product.discount / 100)) : price;
 
             elements.detailContent.innerHTML = `
-                <div class="relative h-72 bg-gray-200 mb-4 rounded-xl shadow-sm">
-                    <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover rounded-xl">
+                <div class="product-image-carousel">
+                    ${product.images.map((img, index) => `
+                        <img src="${img}" alt="${product.name} ${index + 1}">
+                    `).join('')}
                     ${product.discount ? `<div class="discount-badge">Скидка -${product.discount}%</div>` : ''}
                     ${product.volume ? `
                         <div class="absolute top-2 right-2 bg-white/90 rounded-lg px-2 py-1 border shadow-sm">
                             <span class="text-xs font-semibold">${size ? size.weight : product.volume}</span>
                         </div>
                     ` : ''}
+                    <div class="product-image-dots">
+                        ${product.images.map((_, index) => `
+                            <div class="dot ${index === 0 ? 'active' : ''}"></div>
+                        `).join('')}
+                    </div>
                 </div>
                 <div class="space-y-4">
                     <h1 class="text-xl font-bold text-gray-800">${product.name}</h1>
@@ -850,7 +1019,7 @@
             return `
                 <div class="product-card animate-fade-in bg-white rounded-lg shadow-sm overflow-hidden cursor-pointer" onclick="openProductDetailById('${product.id}')">
                     <div class="relative h-36 bg-gray-200">
-                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">
+                        <img src="${product.images[0]}" alt="${product.name}" class="w-full h-full object-cover">
                         ${product.discount ? `<div class="discount-badge">-${product.discount}%</div>` : ''}
                         ${product.isNew ? '<div class="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">NEW</div>' : ''}
                         <button onclick="addToCartById('${product.id}'); event.stopPropagation();" class="add-to-cart-btn absolute bottom-2 right-2 bg-white border border-gray-300 hover:bg-gray-100 p-2 rounded-full shadow-sm">
