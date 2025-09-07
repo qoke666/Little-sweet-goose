@@ -57,18 +57,16 @@
             cursor: pointer; transition: background .3s;
         }
         .carousel-dots .dot.active { background: #d5fd02; }
-        /* === ИСПРАВЛЕНИЕ: ДОБАВЛЕНО scroll-snap-stop: always; === */
+        /* === ИЗМЕНЕНИЕ: НОВАЯ КАРУСЕЛЬ ДЛЯ КАРТОЧКИ ТОВАРА === */
         .product-image-carousel {
-            position: relative; width: 100%; height: 288px; display: flex;
-            overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth;
-            touch-action: pan-x; -webkit-overflow-scrolling: touch; scrollbar-width: none;
-            -ms-overflow-style: none; border-radius: 12px; background: #e5e7eb; margin-bottom: 16px;
-            scroll-snap-stop: always; /* <--- Вот это исправление */
+            position: relative; width: 100%; height: 288px; overflow: hidden;
+            border-radius: 12px; background: #e5e7eb; margin-bottom: 16px;
         }
-        .product-image-carousel::-webkit-scrollbar { display: none; }
         .product-image-carousel img {
-            width: 100%; height: 100%; object-fit: cover; flex-shrink: 0; scroll-snap-align: center;
+            width: 100%; height: 100%; object-fit: cover; position: absolute;
+            top: 0; left: 0; opacity: 0; transition: opacity .5s linear;
         }
+        .product-image-carousel img.active { opacity: 1; z-index: 1; }
         .product-image-dots {
             position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
             display: flex; gap: 5px; z-index: 2;
@@ -87,7 +85,7 @@
         }
         .quantity-btn:hover { background: #e5e7eb; }
         .quantity-btn svg { width: 16px; height: 16px; }
-        .discount-badge {
+        .hot-badge {
             position: absolute; top: 8px; left: 8px; background: #dc2626; color: white;
             padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold;
         }
@@ -117,13 +115,10 @@
         .btn-primary:disabled {
              opacity: 0.7; cursor: not-allowed;
         }
-        /* === ИСПРАВЛЕНИЕ: СКОРРЕКТИРОВАНА ПОЗИЦИЯ КНОПКИ "+" === */
         .add-to-cart-btn {
             position: absolute;
-            bottom: 12px; /* Позиция внутри карточки */
-            right: 12px;
-            width: 40px;
-            height: 40px;
+            bottom: 12px; right: 12px;
+            width: 40px; height: 40px;
             background-color: #db2777;
             border-radius: 50%;
             color: white;
@@ -187,16 +182,10 @@
         </div>
 
         <div class="flex items-center justify-between my-5">
-            <h2 class="text-xl font-bold text-gray-800">Новинки</h2>
-            <span id="new-products-count" class="text-sm text-gray-600">0 товаров</span>
+            <h2 class="text-xl font-bold text-gray-800">Товары</h2>
+            <span id="products-count" class="text-sm text-gray-600">0 товаров</span>
         </div>
-        <div id="new-products-grid" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 mb-10"></div>
-
-        <div class="flex items-center justify-between my-5">
-            <h2 class="text-xl font-bold text-gray-800">Топ-позиции</h2>
-            <span id="top-products-count" class="text-sm text-gray-600">0 товаров</span>
-        </div>
-        <div id="top-products-grid" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 mb-10"></div>
+        <div id="products-grid" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 mb-10"></div>
     </main>
 
     <div id="cart-modal" class="fixed inset-0 bg-white z-50 transform translate-y-full transition-transform duration-300">
@@ -252,14 +241,15 @@
         };
 
         const products = [
-            { id: '1', name: 'Бенто-торт', description: 'Компактный торт с индивидуальным дизайном, идеальный для одного-двух человек', price: 1400, sizes: [{ size: 'S', diameter: '10 см', weight: '450-550 г', price: 1400 },{ size: 'M', diameter: '12 см', weight: '850-950 г', price: 2250 },{ size: 'L', diameter: '14 см', weight: '1.2-1.3 кг', price: 2750 }], fillings: [{ name: 'Маковый лимон с клубникой', image: 'https://i.postimg.cc/2S7kFCFG/image.webp' },{ name: 'Тропики манго-маракуйя', image: 'https://i.postimg.cc/nzCnJB8S/image.webp' },{ name: 'Пломбир малина-апельсин', image: 'https://i.postimg.cc/Kj6VCgFT/image.webp' },{ name: 'Медовик', image: 'https://i.postimg.cc/2S7kFCFG/image.webp' },{ name: 'Шоколадно-кофейный с крошкой Орео', image: 'https://i.postimg.cc/nzCnJB8S/image.webp' },{ name: 'Три шоколада', image: 'https://i.postimg.cc/2S7kFCFG/image.webp' },{ name: 'Морковный', image: 'https://i.postimg.cc/nzCnJB8S/image.webp' },{ name: 'Ореховый со сгущёнкой', image: 'https://i.postimg.cc/Kj6VCgFT/image.webp' }], images: ['https://i.postimg.cc/Wznctb7p/photo-2024-11-25-07-51-57.jpg', 'https://i.postimg.cc/MTjqdSmq/photo-2024-11-21-06-43-06.jpg', 'https://i.postimg.cc/7h3T2VwQ/photo-2024-12-09-17-53-44.jpg', 'https://i.postimg.cc/sfmjvqrC/photo-2024-12-09-18-02-26.jpg'], cartImage: 'https://i.postimg.cc/Wznctb7p/photo-2024-11-25-07-51-57.jpg', category: 'bento', isNew: true, discount: 10, volume: '450 г', ingredients: ['Бисквит ванильный', 'Крем сливочный', 'Фрукты свежие', 'Сахарная мастика'], included: 'В стоимость входит покрытие любого цвета, транспортировочная красивая коробка, лента и свечка.', extra: 'Дизайн, ягоды, фотопечать, цветы оплачиваются отдельно.' },
-            { id: '2', name: 'Моти', description: 'Нежные японские рисовые пирожные с начинкой', price: 100, images: ['https://i.postimg.cc/kXVgzs0r/photo-2024-11-25-07-59-12.jpg', 'https://i.postimg.cc/bwkNNJY3/photo-2024-11-25-07-59-11.jpg'], cartImage: 'https://i.postimg.cc/kXVgzs0r/photo-2024-11-25-07-59-12.jpg', category: 'mochi', isNew: false, volume: '1 шт', ingredients: ['Рисовая мука', 'Сливочная начинка', 'Фруктовое пюре'] },
-            { id: '3', name: 'Картошка', description: 'Классическое пирожное из бисквита и какао', price: 120, images: ['https://i.postimg.cc/yxGYW3Sr/photo-2024-11-25-08-45-29.jpg', 'https://i.postimg.cc/ZYsqw2DF/photo-2024-11-25-08-45-29-2.jpg', 'https://i.postimg.cc/xTW12HQX/photo-2024-11-25-08-45-30.jpg', 'https://i.postimg.cc/XvWNZbp3/photo-2024-11-25-08-45-30-2.jpg'], cartImage: 'https://i.postimg.cc/yxGYW3Sr/photo-2024-11-25-08-45-29.jpg', category: 'kartoshka', isNew: false, volume: '1 шт', ingredients: ['Бисквит шоколадный', 'Какао', 'Сгущенное молоко', 'Масло сливочное'] },
-            { id: '4', name: 'Трюфели', description: 'Шоколадные трюфели ручной работы с насыщенным вкусом', price: 150, images: ['https://i.postimg.cc/qR9Z0t66/photo-2025-04-25-20-09-35.jpg', 'https://i.postimg.cc/xCkFWG8S/photo-2025-04-25-20-09-36.jpg', 'https://i.postimg.cc/tgvMSvX5/photo-2025-04-25-20-09-38.jpg'], cartImage: 'https://i.postimg.cc/qR9Z0t66/photo-2025-04-25-20-09-35.jpg', category: 'truffles', isNew: true, discount: 5, volume: '100 г', ingredients: ['Темный шоколад', 'Сливки', 'Какао-порошок'] }
+            { id: '1', name: 'Бенто-торт', description: 'Компактный торт с индивидуальным дизайном, идеальный для одного-двух человек', price: 1400, sizes: [{ size: 'S', diameter: '10 см', weight: '450-550 г', price: 1400 },{ size: 'M', diameter: '12 см', weight: '850-950 г', price: 2250 },{ size: 'L', diameter: '14 см', weight: '1.2-1.3 кг', price: 2750 }], fillings: [{ name: 'Маковый лимон с клубникой', image: 'https://i.postimg.cc/2S7kFCFG/image.webp' },{ name: 'Тропики манго-маракуйя', image: 'https://i.postimg.cc/nzCnJB8S/image.webp' },{ name: 'Пломбир малина-апельсин', image: 'https://i.postimg.cc/Kj6VCgFT/image.webp' },{ name: 'Медовик', image: 'https://i.postimg.cc/2S7kFCFG/image.webp' },{ name: 'Шоколадно-кофейный с крошкой Орео', image: 'https://i.postimg.cc/nzCnJB8S/image.webp' },{ name: 'Три шоколада', image: 'https://i.postimg.cc/2S7kFCFG/image.webp' },{ name: 'Морковный', image: 'https://i.postimg.cc/nzCnJB8S/image.webp' },{ name: 'Ореховый со сгущёнкой', image: 'https://i.postimg.cc/Kj6VCgFT/image.webp' }], images: ['https://i.postimg.cc/Wznctb7p/photo-2024-11-25-07-51-57.jpg', 'https://i.postimg.cc/MTjqdSmq/photo-2024-11-21-06-43-06.jpg', 'https://i.postimg.cc/7h3T2VwQ/photo-2024-12-09-17-53-44.jpg', 'https://i.postimg.cc/sfmjvqrC/photo-2024-12-09-18-02-26.jpg'], cartImage: 'https://i.postimg.cc/Wznctb7p/photo-2024-11-25-07-51-57.jpg', category: 'bento', isHot: true, volume: '450 г', ingredients: ['Бисквит ванильный', 'Крем сливочный', 'Фрукты свежие', 'Сахарная мастика'], included: 'В стоимость входит покрытие любого цвета, транспортировочная красивая коробка, лента и свечка.', extra: 'Дизайн, ягоды, фотопечать, цветы оплачиваются отдельно.' },
+            { id: '2', name: 'Моти', description: 'Нежные японские рисовые пирожные с начинкой', price: 100, images: ['https://i.postimg.cc/kXVgzs0r/photo-2024-11-25-07-59-12.jpg', 'https://i.postimg.cc/bwkNNJY3/photo-2024-11-25-07-59-11.jpg'], cartImage: 'https://i.postimg.cc/kXVgzs0r/photo-2024-11-25-07-59-12.jpg', category: 'mochi', isHot: true, volume: '1 шт', ingredients: ['Рисовая мука', 'Сливочная начинка', 'Фруктовое пюре'] },
+            { id: '3', name: 'Картошка', description: 'Классическое пирожное из бисквита и какао', price: 120, images: ['https://i.postimg.cc/yxGYW3Sr/photo-2024-11-25-08-45-29.jpg', 'https://i.postimg.cc/ZYsqw2DF/photo-2024-11-25-08-45-29-2.jpg', 'https://i.postimg.cc/xTW12HQX/photo-2024-11-25-08-45-30.jpg', 'https://i.postimg.cc/XvWNZbp3/photo-2024-11-25-08-45-30-2.jpg'], cartImage: 'https://i.postimg.cc/yxGYW3Sr/photo-2024-11-25-08-45-29.jpg', category: 'kartoshka', isHot: true, volume: '1 шт', ingredients: ['Бисквит шоколадный', 'Какао', 'Сгущенное молоко', 'Масло сливочное'] },
+            { id: '4', name: 'Трюфели', description: 'Шоколадные трюфели ручной работы с насыщенным вкусом', price: 150, images: ['https://i.postimg.cc/qR9Z0t66/photo-2025-04-25-20-09-35.jpg', 'https://i.postimg.cc/xCkFWG8S/photo-2025-04-25-20-09-36.jpg', 'https://i.postimg.cc/tgvMSvX5/photo-2025-04-25-20-09-38.jpg'], cartImage: 'https://i.postimg.cc/qR9Z0t66/photo-2025-04-25-20-09-35.jpg', category: 'truffles', isHot: false, volume: '100 г', ingredients: ['Темный шоколад', 'Сливки', 'Какао-порошок'] },
+            { id: '5', name: 'Мадлен', description: 'Нежные французские бисквитные печенья в форме ракушек', price: 80, images: ['https://via.placeholder.com/150?text=Madeleine1', 'https://via.placeholder.com/150?text=Madeleine2'], cartImage: 'https://via.placeholder.com/150?text=Madeleine1', category: 'madeleine', isHot: false, volume: '1 шт', ingredients: ['Пшеничная мука', 'Сливочное масло', 'Яйца', 'Сахар', 'Лимонная цедра'] }
         ];
 
         const elements = {
-            cartBtn: document.getElementById('cart-btn'), cartBadge: document.getElementById('cart-badge'), promoCarousel: document.querySelector('.carousel'), newProductsGrid: document.getElementById('new-products-grid'), topProductsGrid: document.getElementById('top-products-grid'), newProductsCount: document.getElementById('new-products-count'), topProductsCount: document.getElementById('top-products-count'), cartModal: document.getElementById('cart-modal'), cartBackBtn: document.getElementById('cart-back-btn'), cartCloseBtn: document.getElementById('cart-close-btn'), cartContent: document.getElementById('cart-content'), productDetail: document.getElementById('product-detail'), detailBackBtn: document.getElementById('detail-back-btn'), detailCloseBtn: document.getElementById('detail-close-btn'), detailTitle: document.getElementById('detail-title'), detailContent: document.getElementById('detail-content')
+            cartBtn: document.getElementById('cart-btn'), cartBadge: document.getElementById('cart-badge'), promoCarousel: document.querySelector('.carousel'), productsGrid: document.getElementById('products-grid'), productsCount: document.getElementById('products-count'), cartModal: document.getElementById('cart-modal'), cartBackBtn: document.getElementById('cart-back-btn'), cartCloseBtn: document.getElementById('cart-close-btn'), cartContent: document.getElementById('cart-content'), productDetail: document.getElementById('product-detail'), detailBackBtn: document.getElementById('detail-back-btn'), detailCloseBtn: document.getElementById('detail-close-btn'), detailTitle: document.getElementById('detail-title'), detailContent: document.getElementById('detail-content')
         };
 
         function initEventListeners() {
@@ -287,25 +277,42 @@
         function startProductImageCarousel() {
             const carousel = elements.detailContent.querySelector('.product-image-carousel');
             if (!carousel) return;
+            const images = carousel.querySelectorAll('img');
             const dotsContainer = elements.detailContent.querySelector('.product-image-dots');
             if (!dotsContainer) return;
             const dots = dotsContainer.querySelectorAll('.dot');
-            let currentIndex = 0;
+            let currentIndex = appState.productImageIndex;
 
-            function updateDots(index) {
+            function showImage(index) {
+                images.forEach((img, i) => img.classList.toggle('active', i === index));
                 dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+                appState.productImageIndex = index;
             }
 
-            const handleScroll = debounce(() => {
-                const index = Math.round(carousel.scrollLeft / carousel.offsetWidth);
-                if (index !== currentIndex) { currentIndex = index; updateDots(currentIndex); }
-            }, 50);
-
-            carousel.addEventListener('scroll', handleScroll);
             dots.forEach((dot, i) => {
-                dot.addEventListener('click', () => { carousel.scrollTo({ left: i * carousel.offsetWidth, behavior: 'smooth' }); });
+                dot.addEventListener('click', () => {
+                    showImage(i);
+                });
             });
-            updateDots(0);
+
+            let touchStartX = 0;
+            carousel.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+            });
+
+            carousel.addEventListener('touchend', (e) => {
+                const touchEndX = e.changedTouches[0].clientX;
+                const deltaX = touchStartX - touchEndX;
+                if (Math.abs(deltaX) > 50) {
+                    if (deltaX > 0 && currentIndex < images.length - 1) {
+                        showImage(currentIndex + 1);
+                    } else if (deltaX < 0 && currentIndex > 0) {
+                        showImage(currentIndex - 1);
+                    }
+                }
+            });
+
+            showImage(currentIndex);
         }
 
         function openCart() { elements.cartModal.style.transform = 'translateY(0)'; renderCart(); }
@@ -420,46 +427,37 @@
 
         function renderProductDetail() {
             if (!appState.selectedProduct) return;
-            const product = appState.selectedProduct; const size = product.sizes ? product.sizes.find(s => s.size === appState.selectedSize) : null; const price = size ? size.price : product.price; const discountedPrice = product.discount ? Math.round(price * (1 - product.discount / 100)) : price;
-            elements.detailContent.innerHTML = `<div class="product-image-carousel">${product.images.map(img => `<img src="${img}" alt="${product.name}">`).join('')}${product.discount ? `<div class="discount-badge">Скидка -${product.discount}%</div>` : ''}<div class="product-image-dots">${product.images.map((_, i) => `<div class="dot ${i === 0 ? 'active' : ''}"></div>`).join('')}</div></div>
+            const product = appState.selectedProduct; const size = product.sizes ? product.sizes.find(s => s.size === appState.selectedSize) : null; const price = size ? size.price : product.price;
+            elements.detailContent.innerHTML = `<div class="product-image-carousel">${product.images.map((img, i) => `<img src="${img}" alt="${product.name}" class="${i === 0 ? 'active' : ''}">`).join('')}<div class="product-image-dots">${product.images.map((_, i) => `<div class="dot ${i === 0 ? 'active' : ''}"></div>`).join('')}</div></div>
                 <div class="space-y-4"><h1 class="text-xl font-bold text-gray-800">${product.name}</h1>
                     ${product.sizes ? `<div class="space-y-2"><h3 class="font-semibold text-base text-gray-800">Размер</h3><div class="grid grid-cols-3 gap-3">${product.sizes.map(s => `<button class="size-btn p-3 rounded-lg border ${appState.selectedSize === s.size ? 'active border-pink-300 bg-pink-50' : 'hover:border-pink-300'} text-left shadow-sm" onclick="selectSize('${s.size}')"><div class="font-semibold text-sm">${s.size} (${s.diameter})</div><div class="text-xs text-gray-600">${s.weight} / ${s.price} ₽</div></button>`).join('')}</div><p class="text-sm text-gray-600">${product.included}</p><p class="text-sm text-gray-600">${product.extra}</p></div>` : ''}
                     ${product.fillings ? `<div class="space-y-2"><h3 class="font-semibold text-base text-gray-800">Начинка</h3><div class="grid grid-cols-2 gap-3">${product.fillings.map(f => `<button class="filling-btn p-3 rounded-lg border text-center ${appState.selectedFilling === f.name ? 'active border-pink-300 bg-pink-50' : 'hover:border-pink-300'} shadow-sm" onclick="selectFilling('${f.name}')"><div class="font-semibold text-sm">${f.name}</div></button>`).join('')}</div><div class="mt-2 filling-image-container"><img id="filling-image" src="${product.fillings.find(f => f.name === appState.selectedFilling).image}" alt="Начинка ${appState.selectedFilling}" class="w-full h-full object-contain rounded-lg"></div></div>` : ''}
                     <div><p class="text-gray-600 text-sm">${product.description}</p></div>
                     <div class="space-y-2"><button class="flex items-center justify-between w-full py-2 text-left" onclick="toggleIngredients()"><span class="font-semibold text-base text-gray-800">Состав</span><svg id="ingredients-chevron" class="icon w-5 h-5 transition-transform" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button><div id="ingredients-list" class="space-y-1 hidden animate-fade-in">${product.ingredients ? product.ingredients.map(ing => `<div class="text-sm text-gray-600">• ${ing}</div>`).join('') : '<div class="text-sm text-gray-600">Состав отсутствует</div>'}</div></div>
-                    <div class="space-y-3 pt-3"><div class="flex items-center justify-center gap-4"><button class="quantity-btn" onclick="changeDetailQuantity(-1)">-</button><span id="detail-quantity" class="font-semibold text-lg">1</span><button class="quantity-btn" onclick="changeDetailQuantity(1)">+</button></div><button onclick="addToCartFromDetail()" class="btn-primary w-full h-12 bg-pink-600 text-white rounded-lg text-base font-semibold shadow-md">Добавить <span id="detail-total-price">${discountedPrice}</span> ₽</button></div>
+                    <div class="space-y-3 pt-3"><div class="flex items-center justify-center gap-4"><button class="quantity-btn" onclick="changeDetailQuantity(-1)">-</button><span id="detail-quantity" class="font-semibold text-lg">1</span><button class="quantity-btn" onclick="changeDetailQuantity(1)">+</button></div><button onclick="addToCartFromDetail()" class="btn-primary w-full h-12 bg-pink-600 text-white rounded-lg text-base font-semibold shadow-md">Добавить <span id="detail-total-price">${price}</span> ₽</button></div>
                 </div>`;
             startProductImageCarousel();
         }
 
         function renderProducts() {
-            const newProducts = products.filter(p => p.isNew);
-            elements.newProductsCount.textContent = `${newProducts.length} товаров`;
-            elements.newProductsGrid.innerHTML = newProducts.map(renderProductCard).join('');
-            const topProducts = products.filter(p => !p.isNew);
-            elements.topProductsCount.textContent = `${topProducts.length} товаров`;
-            elements.topProductsGrid.innerHTML = topProducts.map(renderProductCard).join('');
+            elements.productsCount.textContent = `${products.length} товаров`;
+            elements.productsGrid.innerHTML = products.map(renderProductCard).join('');
         }
 
-        // === ИСПРАВЛЕНИЕ: УБРАН overflow-hidden С КАРТОЧКИ И ДОБАВЛЕНА ПОДДЕРЖКА SVG ДЛЯ КНОПКИ ===
         function renderProductCard(product) {
             const price = product.sizes ? product.sizes.find(s => s.size === 'S').price : product.price;
-            const discountedPrice = product.discount ? Math.round(price * (1 - product.discount / 100)) : price;
             return `
                 <div class="product-card bg-white rounded-lg shadow-sm flex flex-col relative" onclick="openProductDetailById('${product.id}')">
                     <div class="relative h-36 bg-gray-200 rounded-t-lg overflow-hidden cursor-pointer">
                         <img src="${product.cartImage || product.images[0]}" alt="${product.name}" class="w-full h-full object-cover">
-                        ${product.discount ? `<div class="discount-badge">-${product.discount}%</div>` : ''}
+                        ${product.isHot ? `<div class="hot-badge">HOT</div>` : ''}
                     </div>
                     <div class="p-4 flex flex-col flex-grow">
                         <h3 class="font-semibold text-base line-clamp-1 mb-1 text-gray-800">${product.name}</h3>
                         <p class="text-sm text-gray-600 line-clamp-2 mb-2 h-10">${product.description}</p>
                         <div class="flex items-center justify-between mt-auto pt-2">
                             <div class="flex flex-col">
-                                ${product.discount ? `
-                                    <span class="text-sm text-gray-600 line-through">${price} ₽</span>
-                                    <span class="font-bold text-base text-pink-600">${discountedPrice} ₽</span>
-                                ` : `<span class="font-bold text-base text-pink-600">${price} ₽</span>`}
+                                <span class="font-bold text-base text-pink-600">${price} ₽</span>
                             </div>
                         </div>
                     </div>
@@ -482,7 +480,6 @@
             return function executedFunction(...args) { const later = () => { clearTimeout(timeout); func(...args); }; clearTimeout(timeout); timeout = setTimeout(later, wait); };
         }
 
-        // === ИСПРАВЛЕНИЕ: ВОССТАНОВЛЕНА ВАША ОРИГИНАЛЬНАЯ ЛОГИКА ЗАКАЗА ===
         function placeOrder() {
             const checkoutButton = document.getElementById('checkout-btn');
             const dateInput = document.querySelector('input[type="date"]');
@@ -498,7 +495,6 @@
                 return;
             }
 
-            // --- Блокировка кнопки и смена текста ---
             checkoutButton.disabled = true;
             checkoutButton.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Заказ формируется...`;
 
@@ -529,13 +525,10 @@
                 showNotification('Заказ успешно оформлен! Ожидайте подтверждения. Оплата наличными.', 'success');
                 clearCart();
                 closeCart();
-                // Кнопка будет перерисована со следующим открытием корзины,
-                // поэтому явно возвращать ее в исходное состояние не обязательно.
             })
             .catch(error => {
                 console.error('Error sending order:', error);
                 showNotification('Ошибка при отправке заказа', 'error');
-                // --- Возвращаем кнопку в исходное состояние при ошибке ---
                 checkoutButton.disabled = false;
                 checkoutButton.textContent = 'Оформить заказ';
             });
@@ -548,8 +541,7 @@
             if (appState.selectedProduct) {
                 const size = appState.selectedProduct.sizes ? appState.selectedProduct.sizes.find(s => s.size === appState.selectedSize) : null;
                 const price = size ? size.price : appState.selectedProduct.price;
-                const discountedPrice = appState.selectedProduct.discount ? Math.round(price * (1 - appState.selectedProduct.discount / 100)) : price;
-                document.getElementById('detail-total-price').textContent = discountedPrice * detailQuantity;
+                document.getElementById('detail-total-price').textContent = price * detailQuantity;
             }
         }
 
