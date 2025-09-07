@@ -48,13 +48,32 @@
         .quantity-btn:hover { background: #e5e7eb; }
         .quantity-btn svg { width: 16px; height: 16px; }
         .hot-badge { position: absolute; top: 8px; left: 8px; background: #dc2626; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; }
+
+        /* header adjustments: transparent + pinned icons */
+        .header-elements {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+            padding: 0; height: 56px; background: transparent; box-shadow: none;
+        }
+        /* cart (левый край) */
+        .header-elements .cart-edge {
+            position: absolute; left: 12px; top: 12px; z-index: 70;
+        }
+        /* тайтл центр */
+        .header-elements .header-title {
+            position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 65; font-size: 18px; font-weight: 700; color: #111827;
+        }
+        /* соц. иконки (правый край) */
+        .header-elements .social-edge {
+            position: absolute; right: 12px; top: 10px; z-index: 70; display: flex; gap: 10px; align-items: center;
+        }
+
         .social-links a { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; transition: background-color 0.2s, transform 0.2s; }
-        .social-links a:hover { background-color: #e5e7eb; transform: scale(1.1); }
-        .social-links i { font-size: 22px; color: #4b5563; }
-        .header-elements { position: fixed; top: 0; left: 0; right: 0; z-index: 40; padding: 16px; display: flex; align-items: center; justify-content: space-between; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .social-links a:hover { background-color: rgba(229,231,235,0.8); transform: scale(1.08); }
+        .social-links i { font-size: 18px; color: #374151; }
+
         .size-btn.active, .filling-btn.active { background-color: #fce7f3; border-color: #db2777; }
 
-        /* Центрируем картинку начинки надежно — высокая специфичность и явный класс */
+        /* Центрируем картинку начинки надежно */
         .filling-image-container { aspect-ratio: 4/3; max-height: 96px; overflow: hidden; display: flex; justify-content: center; align-items: center; }
         .filling-image { display: block; margin: 0 auto; max-width: 85%; max-height: 88px; object-fit: contain; border-radius: 8px; }
 
@@ -80,22 +99,26 @@
     <div id="tsparticles"></div>
     <main class="pt-24 pb-20 px-4 max-w-7xl mx-auto relative">
         <div class="header-elements">
-             <div class="relative">
-                <button id="cart-btn" class="p-2 hover:bg-gray-100 rounded-full">
+             <div class="cart-edge">
+                <button id="cart-btn" class="p-2 hover:bg-transparent rounded-full">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
                     <span id="cart-badge" class="absolute -top-1 -right-1 bg-pink-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
                 </button>
             </div>
-            <h1 class="text-xl font-bold text-gray-800">Little Sweet Goose</h1>
-            <div class="social-links flex items-center gap-3">
-                <a href="https://t.me/limitedclubcpa" target="_blank" class="social-link tg-link" data-social="telegram">
-                    <i class="fab fa-telegram-plane"></i>
-                </a>
-                <a href="https://www.instagram.com/thelimitedclub.cpa?igsh=MXkwcXppMWtlZGtm" target="_blank" class="social-link" data-social="instagram">
-                    <i class="fab fa-instagram"></i>
-                </a>
+
+            <div class="header-title">Little Sweet Goose</div>
+
+            <div class="social-edge">
+                <div class="social-links flex items-center gap-3">
+                    <a href="https://t.me/limitedclubcpa" target="_blank" class="social-link tg-link" data-social="telegram" title="Telegram">
+                        <i class="fab fa-telegram-plane"></i>
+                    </a>
+                    <a href="https://www.instagram.com/thelimitedclub.cpa?igsh=MXkwcXppMWtlZGtm" target="_blank" class="social-link" data-social="instagram" title="Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -200,11 +223,46 @@
         };
 
         const products = [
+            // Бенто (не трогаем)
             { id: '1', name: 'Бенто-торт', description: 'Компактный торт с индивидуальным дизайном, идеальный для одного-двух человек', price: 1400, sizes: [{ size: 'S', diameter: '10 см', weight: '450-550 г', price: 1400 },{ size: 'M', diameter: '12 см', weight: '850-950 г', price: 2250 },{ size: 'L', diameter: '14 см', weight: '1.2-1.3 кг', price: 2750 }], fillings: [{ name: 'Маковый лимон с клубникой', image: 'https://i.postimg.cc/2S7kFCFG/image.webp' },{ name: 'Тропики манго-маракуйя', image: 'https://i.postimg.cc/nzCnJB8S/image.webp' },{ name: 'Пломбир малина-апельсин', image: 'https://i.postimg.cc/Kj6VCgFT/image.webp' },{ name: 'Медовик', image: 'https://i.postimg.cc/2S7kFCFG/image.webp' },{ name: 'Шоколадно-кофейный с крошкой Орео', image: 'https://i.postimg.cc/nzCnJB8S/image.webp' },{ name: 'Три шоколада', image: 'https://i.postimg.cc/2S7kFCFG/image.webp' },{ name: 'Морковный', image: 'https://i.postimg.cc/nzCnJB8S/image.webp' },{ name: 'Ореховый со сгущёнкой', image: 'https://i.postimg.cc/Kj6VCgFT/image.webp' }], images: ['https://i.postimg.cc/Wznctb7p/photo-2024-11-25-07-51-57.jpg', 'https://i.postimg.cc/MTjqdSmq/photo-2024-11-21-06-43-06.jpg', 'https://i.postimg.cc/7h3T2VwQ/photo-2024-12-09-17-53-44.jpg', 'https://i.postimg.cc/sfmjvqrC/photo-2024-12-09-18-02-26.jpg'], cartImage: 'https://i.postimg.cc/Wznctb7p/photo-2024-11-25-07-51-57.jpg', category: 'bento', isHot: true, volume: '450 г', ingredients: ['Бисквит ванильный', 'Крем сливочный', 'Фрукты свежие', 'Сахарная мастика'], included: 'В стоимость входит покрытие любого цвета, транспортировочная красивая коробка, лента и свечка.', extra: 'Дизайн, ягоды, фотопечать, цветы оплачиваются отдельно.' },
-            { id: '2', name: 'Моти', description: 'Нежные японские рисовые пирожные с начинкой', price: 100, images: ['https://i.postimg.cc/kXVgzs0r/photo-2024-11-25-07-59-12.jpg', 'https://i.postimg.cc/bwkNNJY3/photo-2024-11-25-07-59-11.jpg'], cartImage: 'https://i.postimg.cc/kXVgzs0r/photo-2024-11-25-07-59-12.jpg', category: 'mochi', isHot: true, volume: '1 шт', ingredients: ['Рисовая мука', 'Сливочная начинка', 'Фруктовое пюре'] },
+
+            // Моти — добавлены начинки
+            { id: '2', name: 'Моти', description: 'Нежные японские рисовые пирожные с начинкой', price: 100,
+              fillings: [
+                  { name: 'смородина', image: 'https://i.postimg.cc/kXVgzs0r/photo-2024-11-25-07-59-12.jpg' },
+                  { name: 'банан', image: 'https://i.postimg.cc/bwkNNJY3/photo-2024-11-25-07-59-11.jpg' },
+                  { name: 'апельсиновый мокко', image: 'https://i.postimg.cc/Kj6VCgFT/image.webp' },
+                  { name: 'баунти', image: 'https://i.postimg.cc/nzCnJB8S/image.webp' },
+                  { name: 'медовик', image: 'https://i.postimg.cc/2S7kFCFG/image.webp' }
+              ],
+              images: ['https://i.postimg.cc/kXVgzs0r/photo-2024-11-25-07-59-12.jpg', 'https://i.postimg.cc/bwkNNJY3/photo-2024-11-25-07-59-11.jpg'],
+              cartImage: 'https://i.postimg.cc/kXVgzs0r/photo-2024-11-25-07-59-12.jpg', category: 'mochi', isHot: true, volume: '1 шт', ingredients: ['Рисовая мука', 'Сливочная начинка', 'Фруктовое пюре'] },
+
+            // Картошка
             { id: '3', name: 'Картошка', description: 'Классическое пирожное из бисквита и какао', price: 120, images: ['https://i.postimg.cc/yxGYW3Sr/photo-2024-11-25-08-45-29.jpg', 'https://i.postimg.cc/ZYsqw2DF/photo-2024-11-25-08-45-29-2.jpg', 'https://i.postimg.cc/xTW12HQX/photo-2024-11-25-08-45-30.jpg', 'https://i.postimg.cc/XvWNZbp3/photo-2024-11-25-08-45-30-2.jpg'], cartImage: 'https://i.postimg.cc/yxGYW3Sr/photo-2024-11-25-08-45-29.jpg', category: 'kartoshka', isHot: true, volume: '1 шт', ingredients: ['Бисквит шоколадный', 'Какао', 'Сгущенное молоко', 'Масло сливочное'] },
-            { id: '4', name: 'Трюфели', description: 'Шоколадные трюфели ручной работы с насыщенным вкусом', price: 150, images: ['https://i.postimg.cc/qR9Z0t66/photo-2025-04-25-20-09-35.jpg', 'https://i.postimg.cc/xCkFWG8S/photo-2025-04-25-20-09-36.jpg', 'https://i.postimg.cc/tgvMSvX5/photo-2025-04-25-20-09-38.jpg'], cartImage: 'https://i.postimg.cc/qR9Z0t66/photo-2025-04-25-20-09-35.jpg', category: 'truffles', isHot: false, volume: '100 г', ingredients: ['Темный шоколад', 'Сливки', 'Какао-порошок'] },
-            { id: '5', name: 'Мадлен', description: 'Нежные французские бисквитные печенья в форме ракушек', price: 80, images: ['https://via.placeholder.com/150?text=Madeleine1', 'https://via.placeholder.com/150?text=Madeleine2'], cartImage: 'https://via.placeholder.com/150?text=Madeleine1', category: 'madeleine', isHot: false, volume: '1 шт', ingredients: ['Пшеничная мука', 'Сливочное масло', 'Яйца', 'Сахар', 'Лимонная цедра'] }
+
+            // Трюфели — добавлены начинки
+            { id: '4', name: 'Трюфели', description: 'Шоколадные трюфели ручной работы с насыщенным вкусом', price: 150,
+              fillings: [
+                  { name: 'Апельсиновый', image: 'https://i.postimg.cc/qR9Z0t66/photo-2025-04-25-20-09-35.jpg' },
+                  { name: 'Лимонный', image: 'https://i.postimg.cc/xCkFWG8S/photo-2025-04-25-20-09-36.jpg' },
+                  { name: 'Фисташковый', image: 'https://i.postimg.cc/tgvMSvX5/photo-2025-04-25-20-09-38.jpg' },
+                  { name: 'малиновый', image: 'https://i.postimg.cc/7h3T2VwQ/photo-2024-12-09-17-53-44.jpg' },
+                  { name: 'Ореховый', image: 'https://i.postimg.cc/Kj6VCgFT/image.webp' }
+              ],
+              images: ['https://i.postimg.cc/qR9Z0t66/photo-2025-04-25-20-09-35.jpg', 'https://i.postimg.cc/xCkFWG8S/photo-2025-04-25-20-09-36.jpg', 'https://i.postimg.cc/tgvMSvX5/photo-2025-04-25-20-09-38.jpg'],
+              cartImage: 'https://i.postimg.cc/qR9Z0t66/photo-2025-04-25-20-09-35.jpg', category: 'truffles', isHot: false, volume: '100 г', ingredients: ['Темный шоколад', 'Сливки', 'Какао-порошок'] },
+
+            // Мадлен — добавлены начинки
+            { id: '5', name: 'Мадлен', description: 'Нежные французские бисквитные печенья в форме ракушек', price: 80,
+              fillings: [
+                  { name: 'Красный бархат с малиной', image: 'https://via.placeholder.com/300?text=Red+Velvet' },
+                  { name: 'Шоколад-кофе-апельсин', image: 'https://via.placeholder.com/300?text=Choco+Coffee+Orange' },
+                  { name: 'Фисташка-малина', image: 'https://via.placeholder.com/300?text=Pistachio+Raspberry' },
+                  { name: 'Маковый лимон', image: 'https://via.placeholder.com/300?text=Poppy+Lemon' }
+              ],
+              images: ['https://i.postimg.cc/4yq0XsBy/photo-2024-12-09-18-40-29.jpg', 'https://i.postimg.cc/JzLLX55n/photo-2024-12-09-18-40-33.jpg'],
+              cartImage: 'https://via.placeholder.com/150?text=Madeleine1', category: 'madeleine', isHot: false, volume: '1 шт', ingredients: ['Пшеничная мука', 'Сливочное масло', 'Яйца', 'Сахар', 'Лимонная цедра'] }
         ];
 
         const elements = {
@@ -429,7 +487,7 @@
             const product = appState.selectedProduct; const size = product.sizes ? product.sizes.find(s => s.size === appState.selectedSize) : null; const price = size ? size.price : product.price;
             elements.detailContent.innerHTML = `<div class="product-image-carousel">${product.images.map((img, i) => `<img src="${img}" alt="${product.name}" class="${i === 0 ? 'active' : ''}">`).join('')}<div class="product-image-dots">${product.images.map((_, i) => `<div class="dot ${i === 0 ? 'active' : ''}"></div>`).join('')}</div></div>
                 <div class="space-y-4"><h1 class="text-xl font-bold text-gray-800">${product.name}</h1>
-                    ${product.sizes ? `<div class="space-y-2"><h3 class="font-semibold text-base text-gray-800">Размер</h3><div class="grid grid-cols-3 gap-3">${product.sizes.map(s => `<button class="size-btn p-3 rounded-lg border ${appState.selectedSize === s.size ? 'active border-pink-300 bg-pink-50' : 'hover:border-pink-300'} text-left shadow-sm" onclick="selectSize('${s.size}')"><div class="font-semibold text-sm">${s.size} (${s.diameter})</div><div class="text-xs text-gray-600">${s.weight} / ${s.price} ₽</div></button>`).join('')}</div><p class="text-sm text-gray-600">${product.included}</p><p class="text-sm text-gray-600">${product.extra}</p></div>` : ''}
+                    ${product.sizes ? `<div class="space-y-2"><h3 class="font-semibold text-base text-gray-800">Размер</h3><div class="grid grid-cols-3 gap-3">${product.sizes.map(s => `<button class="size-btn p-3 rounded-lg border ${appState.selectedSize === s.size ? 'active border-pink-300 bg-pink-50' : 'hover:border-pink-300'} text-left shadow-sm" onclick="selectSize('${s.size}')"><div class="font-semibold text-sm">${s.size} (${s.diameter})</div><div class="text-xs text-gray-600">${s.weight} / ${s.price} ₽</div></button>`).join('')}</div><p class="text-sm text-gray-600">${product.included || ''}</p><p class="text-sm text-gray-600">${product.extra || ''}</p></div>` : ''}
                     ${product.fillings ? `<div class="space-y-2"><h3 class="font-semibold text-base text-gray-800">Начинка</h3><div class="grid grid-cols-2 gap-3">${product.fillings.map(f => `<button class="filling-btn p-3 rounded-lg border text-center ${appState.selectedFilling === f.name ? 'active border-pink-300 bg-pink-50' : 'hover:border-pink-300'} shadow-sm" onclick="selectFilling('${f.name}')"><div class="font-semibold text-sm">${f.name}</div></button>`).join('')}</div><div class="mt-2 filling-image-container"><img id="filling-image" src="${product.fillings.find(f => f.name === appState.selectedFilling).image}" alt="Начинка ${appState.selectedFilling}" class="filling-image"></div></div>` : ''}
                     <div><p class="text-gray-600 text-sm">${product.description}</p></div>
                     <div class="space-y-2"><button class="flex items-center justify-between w-full py-2 text-left" onclick="toggleIngredients()"><span class="font-semibold text-base text-gray-800">Состав</span><svg id="ingredients-chevron" class="icon w-5 h-5 transition-transform" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button><div id="ingredients-list" class="space-y-1 hidden animate-fade-in">${product.ingredients ? product.ingredients.map(ing => `<div class="text-sm text-gray-600">• ${ing}</div>`).join('') : '<div class="text-sm text-gray-600">Состав отсутствует</div>'}</div></div>
