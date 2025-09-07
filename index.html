@@ -53,7 +53,8 @@
         .social-links i { font-size: 22px; color: #4b5563; }
         .header-elements { position: fixed; top: 0; left: 0; right: 0; z-index: 40; padding: 16px; display: flex; align-items: center; justify-content: space-between; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .size-btn.active, .filling-btn.active { background-color: #fce7f3; border-color: #db2777; }
-        .filling-image-container { aspect-ratio: 4/3; max-height: 96px; overflow: hidden; display: flex; justify-content: center; }
+        /* <-- Здесь добавил align-items:center, чтобы картинка начинки была по центру по вертикали --> */
+        .filling-image-container { aspect-ratio: 4/3; max-height: 96px; overflow: hidden; display: flex; justify-content: center; align-items: center; }
         .btn-primary { transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
         .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); }
         .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
@@ -280,7 +281,6 @@
                 index = Math.max(0, Math.min(images.length - 1, index));
                 images.forEach((img, i) => {
                     img.classList.toggle('active', i === index);
-                    // small directional transform for nicer feel
                     if (i === index) {
                         img.style.transform = 'translateX(0)';
                     } else {
@@ -299,11 +299,6 @@
                 startX = e.touches[0].clientX;
                 isPointerDown = true;
             });
-            carousel.addEventListener('touchmove', (e) => {
-                if (!isPointerDown) return;
-                // prevent page scroll while swiping horizontally
-                // but minimal approach: do nothing else here
-            }, { passive: true });
             carousel.addEventListener('touchend', (e) => {
                 if (!isPointerDown) return;
                 const endX = e.changedTouches[0].clientX;
@@ -334,17 +329,13 @@
                 carousel.classList.remove('dragging');
             });
 
-            // init state
             showImage(currentIndex);
         }
 
         function openCart() { elements.cartModal.style.transform = 'translateY(0)'; renderCart(); }
         function closeCart() { elements.cartModal.style.transform = 'translateY(100%)'; }
 
-        function normalizeKey(val) {
-            // Normalize null/undefined to empty string for comparisons
-            return val == null ? '' : String(val);
-        }
+        function normalizeKey(val) { return val == null ? '' : String(val); }
 
         function addToCartById(productId, quantity = 1) {
             const product = products.find(p => p.id === productId); if (!product) return;
@@ -358,7 +349,6 @@
         }
 
         function updateCartQuantity(productId, newQuantity, size, filling) {
-            // robust comparison using normalizeKey
             const item = appState.cart.find(i => String(i.id) === String(productId) && normalizeKey(i.selectedSize) === normalizeKey(size) && normalizeKey(i.selectedFilling) === normalizeKey(filling));
             if (!item) return;
             if (newQuantity <= 0) { removeFromCart(productId, size, filling); return; }
@@ -395,14 +385,12 @@
                 return;
             }
 
-            // Render full list (scrollable) and footer only with summary + "Перейти к оформлению"
             cartContent.innerHTML = `
                 <div class="cart-list">
                     ${appState.cart.map(item => {
                         const product = products.find(p => p.id === item.id) || {};
                         const size = product.sizes ? product.sizes.find(s => s.size === item.selectedSize) : null;
                         const price = size ? size.price : item.price;
-                        // normalize filling display
                         const fillingText = item.selectedFilling ? `, ${item.selectedFilling}` : '';
                         return `<div class="cart-item animate-fade-in flex gap-4 bg-white p-4 rounded-lg shadow-sm mb-3">
                             <img src="${item.cartImage || 'https://via.placeholder.com/150?text=Placeholder'}" alt="${item.name}" class="w-20 h-20 object-cover rounded-lg flex-shrink-0">
@@ -439,7 +427,6 @@
                         <button onclick="closeCart()" class="col-span-1 w-full h-12 border rounded-lg">Продолжить покупки</button>
                     </div>
                 </div>`;
-            // attach checkout opener
             const checkoutBtn = document.getElementById('checkout-open-btn');
             if (checkoutBtn) {
                 checkoutBtn.addEventListener('click', () => {
@@ -465,7 +452,7 @@
             elements.detailContent.innerHTML = `<div class="product-image-carousel">${product.images.map((img, i) => `<img src="${img}" alt="${product.name}" class="${i === 0 ? 'active' : ''}">`).join('')}<div class="product-image-dots">${product.images.map((_, i) => `<div class="dot ${i === 0 ? 'active' : ''}"></div>`).join('')}</div></div>
                 <div class="space-y-4"><h1 class="text-xl font-bold text-gray-800">${product.name}</h1>
                     ${product.sizes ? `<div class="space-y-2"><h3 class="font-semibold text-base text-gray-800">Размер</h3><div class="grid grid-cols-3 gap-3">${product.sizes.map(s => `<button class="size-btn p-3 rounded-lg border ${appState.selectedSize === s.size ? 'active border-pink-300 bg-pink-50' : 'hover:border-pink-300'} text-left shadow-sm" onclick="selectSize('${s.size}')"><div class="font-semibold text-sm">${s.size} (${s.diameter})</div><div class="text-xs text-gray-600">${s.weight} / ${s.price} ₽</div></button>`).join('')}</div><p class="text-sm text-gray-600">${product.included}</p><p class="text-sm text-gray-600">${product.extra}</p></div>` : ''}
-                    ${product.fillings ? `<div class="space-y-2"><h3 class="font-semibold text-base text-gray-800">Начинка</h3><div class="grid grid-cols-2 gap-3">${product.fillings.map(f => `<button class="filling-btn p-3 rounded-lg border text-center ${appState.selectedFilling === f.name ? 'active border-pink-300 bg-pink-50' : 'hover:border-pink-300'} shadow-sm" onclick="selectFilling('${f.name}')"><div class="font-semibold text-sm">${f.name}</div></button>`).join('')}</div><div class="mt-2 filling-image-container"><img id="filling-image" src="${product.fillings.find(f => f.name === appState.selectedFilling).image}" alt="Начинка ${appState.selectedFilling}" class="w-full h-full object-contain rounded-lg"></div></div>` : ''}
+                    ${product.fillings ? `<div class="space-y-2"><h3 class="font-semibold text-base text-gray-800">Начинка</h3><div class="grid grid-cols-2 gap-3">${product.fillings.map(f => `<button class="filling-btn p-3 rounded-lg border text-center ${appState.selectedFilling === f.name ? 'active border-pink-300 bg-pink-50' : 'hover:border-pink-300'} shadow-sm" onclick="selectFilling('${f.name}')"><div class="font-semibold text-sm">${f.name}</div></button>`).join('')}</div><div class="mt-2 filling-image-container"><img id="filling-image" src="${product.fillings.find(f => f.name === appState.selectedFilling).image}" alt="Начинка ${appState.selectedFilling}" class="max-w-full max-h-full object-contain rounded-lg"></div></div>` : ''}
                     <div><p class="text-gray-600 text-sm">${product.description}</p></div>
                     <div class="space-y-2"><button class="flex items-center justify-between w-full py-2 text-left" onclick="toggleIngredients()"><span class="font-semibold text-base text-gray-800">Состав</span><svg id="ingredients-chevron" class="icon w-5 h-5 transition-transform" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button><div id="ingredients-list" class="space-y-1 hidden animate-fade-in">${product.ingredients ? product.ingredients.map(ing => `<div class="text-sm text-gray-600">• ${ing}</div>`).join('') : '<div class="text-sm text-gray-600">Состав отсутствует</div>'}</div></div>
                     <div class="space-y-3 pt-3"><div class="flex items-center justify-center gap-4"><button class="quantity-btn" onclick="changeDetailQuantity(-1)">-</button><span id="detail-quantity" class="font-semibold text-lg">${appState.detailQuantity || 1}</span><button class="quantity-btn" onclick="changeDetailQuantity(1)">+</button></div><button onclick="addToCartFromDetail()" class="btn-primary w-full h-12 bg-pink-600 text-white rounded-lg text-base font-semibold shadow-md">Добавить <span id="detail-total-price">${price}</span> ₽</button></div>
@@ -517,13 +504,11 @@
 
         /* Checkout modal controls */
         function openCheckout() {
-            // populate min date and total
             elements.checkoutDate.min = getMinOrderDate();
             elements.checkoutDate.value = getMinOrderDate();
             updateCheckoutTotal();
             elements.checkoutModal.classList.add('open');
             elements.checkoutModal.setAttribute('aria-hidden', 'false');
-            // set phone prefill if Telegram user available
             const telegram = window.Telegram?.WebApp;
             const user = telegram?.initDataUnsafe?.user || {};
             if (user.phone_number && !elements.checkoutPhone.value) elements.checkoutPhone.value = user.phone_number;
@@ -542,7 +527,6 @@
         }
 
         function placeOrderFromCheckout() {
-            // delegate to placeOrder but read inputs from checkout modal
             placeOrder();
         }
 
@@ -595,7 +579,6 @@
                 }
             };
 
-            // send to Google Apps Script (kept as in original; note: no-cors will produce opaque response)
             fetch('https://script.google.com/macros/s/AKfycbyAq2_5piTuUqFu4FxAc1I-3I31nS6SBFxbZVDDbkIPgKyqT3QdcdxjPX8QXIcgjnpS-g/exec', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(orderData), mode: 'no-cors'
             })
