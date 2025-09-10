@@ -86,14 +86,15 @@
             justify-content: center;
             border-radius: 10px;
             transition: background-color .15s, transform .15s;
+            background: rgba(255,255,255,0.6);
         }
-        .header-elements .icon-btn i, .header-elements .social-edge i {
+        .header-elements .icon-btn i, .header-elements .social-edge i, .header-elements .icon-btn svg {
             font-size: 18px;
             line-height: 1;
             color: #374151;
         }
         .header-elements .icon-btn:hover, .header-elements .social-edge a:hover {
-            background: rgba(229,231,235,0.7);
+            background: rgba(229,231,235,0.9);
             transform: translateY(-2px);
         }
 
@@ -114,15 +115,37 @@
             .product-card:hover { transform: translateY(-4px); }
         }
 
+        /* fly-to-cart image */
+        .fly-img {
+            position: fixed;
+            pointer-events: none;
+            z-index: 2200;
+            transition: transform 0.85s cubic-bezier(.22,.9,.32,1), opacity 0.6s ease;
+            will-change: transform, opacity;
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+        }
+
         /* checkout modal */
         #checkout-modal { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; transform: translateY(110%); transition: transform .28s ease; background: white; border-top-left-radius: 12px; border-top-right-radius: 12px; box-shadow: 0 -6px 24px rgba(0,0,0,0.12); max-height: 85vh; overflow: auto; }
         #checkout-modal.open { transform: translateY(0); }
         /* ensure cart items scroll correctly */
         #cart-content .cart-list { max-height: calc(100vh - 220px); overflow: auto; padding: 1rem; }
+
+        /* subtle backdrop when modals open */
+        .modal-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.18); z-index: 100; opacity: 0; pointer-events: none; transition: opacity .2s ease;
+        }
+        .modal-backdrop.visible { opacity: 1; pointer-events: auto; }
+
     </style>
 </head>
 <body class="bg-gray-100 relative">
     <div id="tsparticles"></div>
+
+    <!-- backdrop (used when product detail or cart or checkout open) -->
+    <div id="modal-backdrop" class="modal-backdrop" aria-hidden="true"></div>
+
     <main class="pt-24 pb-20 px-4 max-w-7xl mx-auto relative">
         <div class="header-elements" id="top-bar">
              <div class="cart-edge">
@@ -141,7 +164,7 @@
                     <a href="https://t.me/sweetworkshopp" target="_blank" class="icon-btn" data-social="telegram" title="Telegram">
                         <i class="fab fa-telegram-plane"></i>
                     </a>
-                    <a href="https://t.me/sweetworkshopp" target="_blank" class="icon-btn" data-social="instagram" title="Instagram">
+                    <a href="https://www.instagram.com/thelimitedclub.cpa" target="_blank" class="icon-btn" data-social="instagram" title="Instagram">
                         <i class="fab fa-instagram"></i>
                     </a>
                 </div>
@@ -163,7 +186,7 @@
     </main>
 
     <!-- cart modal -->
-    <div id="cart-modal" class="fixed inset-0 bg-white z-50 transform translate-y-full transition-transform duration-300">
+    <div id="cart-modal" class="fixed inset-0 bg-white z-50 transform translate-y-full transition-transform duration-300" aria-hidden="true">
         <div class="flex flex-col h-full">
             <div class="flex items-center justify-between p-4 border-b bg-white shadow-sm sticky top-0">
                 <button id="cart-back-btn" aria-label="Назад">
@@ -179,7 +202,7 @@
     </div>
 
     <!-- product detail modal -->
-    <div id="product-detail" class="fixed inset-0 bg-white z-50 transform translate-y-full transition-transform duration-300">
+    <div id="product-detail" class="fixed inset-0 bg-white z-50 transform translate-y-full transition-transform duration-300" aria-hidden="true">
         <div class="flex flex-col h-full">
             <div class="flex items-center justify-between p-4 border-b bg-white shadow-sm sticky top-0">
                 <button id="detail-back-btn" aria-label="Назад">
@@ -280,7 +303,8 @@
             checkoutDate: document.getElementById('checkout-date'),
             checkoutTime: document.getElementById('checkout-time'),
             checkoutPhone: document.getElementById('checkout-phone'),
-            placeOrderBtnElement: document.getElementById('place-order-btn')
+            placeOrderBtnElement: document.getElementById('place-order-btn'),
+            modalBackdrop: document.getElementById('modal-backdrop')
         };
 
         // track modal open state
@@ -289,6 +313,9 @@
             const anyOpen = modalState.cart || modalState.detail || modalState.checkout;
             if (elements.header) {
                 elements.header.classList.toggle('header-hidden', anyOpen);
+                // backdrop
+                elements.modalBackdrop.classList.toggle('visible', anyOpen);
+                elements.modalBackdrop.setAttribute('aria-hidden', !anyOpen);
             }
         }
 
@@ -301,6 +328,12 @@
             elements.checkoutClose.addEventListener('click', closeCheckout);
             elements.checkoutBackBtn.addEventListener('click', closeCheckout);
             elements.placeOrderBtn.addEventListener('click', placeOrderFromCheckout);
+            elements.modalBackdrop.addEventListener('click', () => {
+                // close whichever is open (checkout over cart over detail)
+                if (modalState.checkout) closeCheckout();
+                else if (modalState.cart) closeCart();
+                else if (modalState.detail) closeProductDetail();
+            });
             startCarousel();
             initScrollHide(); // стартуем слушатель скролла
         }
@@ -370,30 +403,119 @@
             showImage(currentIndex);
         }
 
+        /* --- fly-to-cart animation --- */
+        function animateImageToCart(imgEl) {
+            try {
+                if (!imgEl) return;
+                const rect = imgEl.getBoundingClientRect();
+                const cartRect = elements.cartBtn.getBoundingClientRect();
+
+                const clone = imgEl.cloneNode(true);
+                clone.className += ' fly-img';
+                clone.style.width = rect.width + 'px';
+                clone.style.height = rect.height + 'px';
+                clone.style.left = rect.left + 'px';
+                clone.style.top = rect.top + 'px';
+                clone.style.opacity = '1';
+                clone.style.transform = 'translate3d(0,0,0) scale(1)';
+                document.body.appendChild(clone);
+
+                // force reflow
+                clone.getBoundingClientRect();
+
+                const startCenterX = rect.left + rect.width / 2;
+                const startCenterY = rect.top + rect.height / 2;
+                const endCenterX = cartRect.left + cartRect.width / 2;
+                const endCenterY = cartRect.top + cartRect.height / 2;
+
+                const translateX = endCenterX - startCenterX;
+                const translateY = endCenterY - startCenterY;
+
+                // animate: fly + rotate + scale down
+                requestAnimationFrame(() => {
+                    clone.style.transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(0.18) rotate(15deg)`;
+                    clone.style.opacity = '0.9';
+                });
+
+                // small pulse on cart badge when done
+                setTimeout(() => {
+                    clone.style.opacity = '0';
+                }, 650);
+
+                setTimeout(() => {
+                    clone.remove();
+                    // small badge pulse
+                    elements.cartBadge.animate([
+                        { transform: 'scale(1)' },
+                        { transform: 'scale(1.35)' },
+                        { transform: 'scale(1)' }
+                    ], { duration: 350, easing: 'cubic-bezier(.2,.9,.3,1)' });
+                }, 900);
+            } catch (e) { console.error('animateImageToCart error', e); }
+        }
+
+        /* Helpers for finding source image when adding */
+        function findProductCardImageByButton(buttonEl) {
+            if (!buttonEl) return null;
+            const card = buttonEl.closest('.product-card');
+            if (!card) return null;
+            return card.querySelector('img');
+        }
+
         function openCart() {
             modalState.cart = true;
             updateHeaderVisibility();
             elements.cartModal.style.transform = 'translateY(0)';
+            elements.cartModal.setAttribute('aria-hidden', 'false');
             renderCart();
         }
         function closeCart() {
             modalState.cart = false;
             elements.cartModal.style.transform = 'translateY(100%)';
-            // обновляем видимость шапки после небольшого таймаута, чтобы анимация была плавной
+            elements.cartModal.setAttribute('aria-hidden', 'true');
             setTimeout(updateHeaderVisibility, 50);
         }
 
         function normalizeKey(val) { return val == null ? '' : String(val); }
 
-        function addToCartById(productId, quantity = 1) {
+        /* Modified: accept optional source (HTMLElement or HTMLImageElement) to animate from */
+        function addToCartById(productId, quantity = 1, source = null) {
             const product = products.find(p => p.id === productId); if (!product) return;
+
+            // select filling/size defaults
             appState.selectedSize = product.sizes ? appState.selectedSize || 'S' : null;
             appState.selectedFilling = product.fillings ? appState.selectedFilling || product.fillings[0].name : null;
+
+            // update cart data
             const existingItem = appState.cart.find(item => String(item.id) === String(product.id) && normalizeKey(item.selectedSize) === normalizeKey(appState.selectedSize) && normalizeKey(item.selectedFilling) === normalizeKey(appState.selectedFilling));
             if (existingItem) { existingItem.quantity += quantity; } else { appState.cart.push({ ...product, quantity, selectedSize: appState.selectedSize, selectedFilling: appState.selectedFilling }); }
+
             try { localStorage.setItem('cart', JSON.stringify(appState.cart)); } catch (e) { console.error('LocalStorage set error', e); }
+
+            // update badge right away
             updateCartBadge();
+
+            // find source image element for animation
+            let imgEl = null;
+            if (source instanceof HTMLImageElement) imgEl = source;
+            else if (source instanceof HTMLElement) imgEl = findProductCardImageByButton(source);
+            else {
+                // try to find active image in detail modal
+                const active = document.querySelector('#detail-content .product-image-carousel img.active');
+                if (active) imgEl = active;
+                else {
+                    // fallback: find product card image by product id
+                    const cardImg = document.querySelector(`.product-card img[data-product-id="${productId}"]`);
+                    if (cardImg) imgEl = cardImg;
+                }
+            }
+
+            // animate (non-blocking)
+            animateImageToCart(imgEl);
+
             showNotification(`${product.name} добавлен в корзину`, 'success');
+            // re-render cart (if open) so user sees updated amounts
+            if (modalState.cart) renderCart();
         }
 
         function updateCartQuantity(productId, newQuantity, size, filling) {
@@ -490,10 +612,11 @@
             modalState.detail = true;
             updateHeaderVisibility();
             elements.productDetail.style.transform = 'translateY(0)';
+            elements.productDetail.setAttribute('aria-hidden', 'false');
             renderProductDetail();
         }
 
-        function closeProductDetail() { modalState.detail = false; elements.productDetail.style.transform = 'translateY(100%)'; appState.detailQuantity = 1; setTimeout(updateHeaderVisibility, 50); }
+        function closeProductDetail() { modalState.detail = false; elements.productDetail.style.transform = 'translateY(100%)'; elements.productDetail.setAttribute('aria-hidden', 'true'); appState.detailQuantity = 1; setTimeout(updateHeaderVisibility, 50); }
         function selectSize(size) { appState.selectedSize = size; renderProductDetail(); }
         function selectFilling(filling) { appState.selectedFilling = filling; renderProductDetail(); }
 
@@ -506,7 +629,7 @@
                     ${product.fillings ? `<div class="space-y-2"><h3 class="font-semibold text-base text-gray-800">Начинка</h3><div class="grid grid-cols-2 gap-3">${product.fillings.map(f => `<button class="filling-btn p-3 rounded-lg border text-center ${appState.selectedFilling === f.name ? 'active border-pink-300 bg-pink-50' : 'hover:border-pink-300'} shadow-sm" onclick="selectFilling('${f.name}')"><div class="font-semibold text-sm">${f.name}</div></button>`).join('')}</div><div class="mt-2 filling-image-container"><img id="filling-image" src="${product.fillings.find(f => f.name === appState.selectedFilling).image}" alt="Начинка ${appState.selectedFilling}" class="filling-image"></div></div>` : ''}
                     <div><p class="text-gray-600 text-sm">${product.description}</p></div>
                     <div class="space-y-2"><button class="flex items-center justify-between w-full py-2 text-left" onclick="toggleIngredients()"><span class="font-semibold text-base text-gray-800">Состав</span><svg id="ingredients-chevron" class="icon w-5 h-5 transition-transform" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button><div id="ingredients-list" class="space-y-1 hidden animate-fade-in">${product.ingredients ? product.ingredients.map(ing => `<div class="text-sm text-gray-600">• ${ing}</div>`).join('') : '<div class="text-sm text-gray-600">Состав отсутствует</div>'}</div></div>
-                    <div class="space-y-3 pt-3"><div class="flex items-center justify-center gap-4"><button class="quantity-btn" onclick="changeDetailQuantity(-1)">-</button><span id="detail-quantity" class="font-semibold text-lg">${appState.detailQuantity || 1}</span><button class="quantity-btn" onclick="changeDetailQuantity(1)">+</button></div><button onclick="addToCartFromDetail()" class="btn-primary w-full h-12 bg-pink-600 text-white rounded-lg text-base font-semibold shadow-md">Добавить <span id="detail-total-price">${price}</span> ₽</button></div>
+                    <div class="space-y-3 pt-3"><div class="flex items-center justify-center gap-4"><button class="quantity-btn" onclick="changeDetailQuantity(-1)">-</button><span id="detail-quantity" class="font-semibold text-lg">${appState.detailQuantity || 1}</span><button class="quantity-btn" onclick="changeDetailQuantity(1)">+</button></div><button id="detail-add-btn" onclick="addToCartFromDetail()" class="btn-primary w-full h-12 bg-pink-600 text-white rounded-lg text-base font-semibold shadow-md">Добавить <span id="detail-total-price">${price}</span> ₽</button></div>
                 </div>`;
             startProductImageCarousel();
         }
@@ -518,10 +641,11 @@
 
         function renderProductCard(product) {
             const price = product.sizes ? product.sizes.find(s => s.size === 'S').price : product.price;
+            // note: we add data-product-id on image so we can find it for animation fallback
             return `
                 <div class="product-card bg-white rounded-lg shadow-sm flex flex-col relative" onclick="openProductDetailById('${product.id}')">
                     <div class="relative h-36 bg-gray-200 rounded-t-lg overflow-hidden cursor-pointer">
-                        <img src="${product.cartImage || product.images[0]}" alt="${product.name}" class="w-full h-full object-cover">
+                        <img data-product-id="${product.id}" src="${product.cartImage || product.images[0]}" alt="${product.name}" class="w-full h-full object-cover">
                         ${product.isHot ? `<div class="hot-badge">HOT</div>` : ''}
                     </div>
                     <div class="p-4 flex flex-col flex-grow">
@@ -533,7 +657,7 @@
                             </div>
                         </div>
                     </div>
-                    <button onclick="addToCartById('${product.id}'); event.stopPropagation();" class="add-to-cart-btn" aria-label="Добавить в корзину">
+                    <button onclick="addToCartById('${product.id}',1,this); event.stopPropagation();" class="add-to-cart-btn" aria-label="Добавить в корзину">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                     </button>
                 </div>`;
@@ -661,10 +785,18 @@
             }
         }
 
-        function addToCartFromDetail() { if (appState.selectedProduct) { addToCartById(appState.selectedProduct.id, appState.detailQuantity || 1); closeProductDetail(); } }
+        /* add from detail: pass active image to animation */
+        function addToCartFromDetail() {
+            if (!appState.selectedProduct) return;
+            const activeImg = document.querySelector('#detail-content .product-image-carousel img.active');
+            addToCartById(appState.selectedProduct.id, appState.detailQuantity || 1, activeImg || null);
+            closeProductDetail();
+        }
+
         function toggleIngredients() { const list = document.getElementById('ingredients-list'); const chevron = document.getElementById('ingredients-chevron'); list.classList.toggle('hidden'); chevron.classList.toggle('rotate-180'); }
 
         /* HIDE HEADER ON SCROLL (down) - SHOW ON SCROLL UP
+           + show header also when near top (user approaches top)
            - doesn't conflict with modal hiding
            - uses rAF for better performance
         */
@@ -672,16 +804,11 @@
             let lastScrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
             let ticking = false;
             const header = elements.header;
+            const SHOW_NEAR_TOP = 120; // px from top where always show header
 
             function onScrollTick() {
                 const st = window.pageYOffset || document.documentElement.scrollTop || 0;
                 const delta = st - lastScrollTop;
-
-                // small deadzone
-                if (Math.abs(delta) < 10) {
-                    ticking = false;
-                    return;
-                }
 
                 // if any modal open, keep header hidden via modalState handler
                 if (modalState.cart || modalState.detail || modalState.checkout) {
@@ -691,14 +818,15 @@
                     return;
                 }
 
-                if (st > lastScrollTop && st > 40) {
-                    // scrolling down
-                    header.classList.add('header-hidden');
+                // if near top, always show header
+                if (st <= SHOW_NEAR_TOP) {
+                    header.classList.remove('header-hidden');
                 } else {
-                    // scrolling up
-                    if (st <= 10) {
-                        header.classList.remove('header-hidden');
+                    // if scrolling down -> hide
+                    if (st > lastScrollTop && st > 40) {
+                        header.classList.add('header-hidden');
                     } else {
+                        // scrolling up -> show
                         header.classList.remove('header-hidden');
                     }
                 }
@@ -714,8 +842,8 @@
                 }
             }, { passive: true });
 
-            // ensure header visible on load top
-            if ((window.pageYOffset || document.documentElement.scrollTop || 0) <= 10) {
+            // ensure header visible on load near top
+            if ((window.pageYOffset || document.documentElement.scrollTop || 0) <= SHOW_NEAR_TOP) {
                 header.classList.remove('header-hidden');
             }
         }
