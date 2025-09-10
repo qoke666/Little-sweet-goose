@@ -51,34 +51,51 @@
 
         /* header adjustments: transparent + pinned icons */
         .header-elements {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 120;
             padding: 0; height: 56px; background: transparent; box-shadow: none;
             transition: opacity .22s ease, transform .22s ease;
             display: block;
+            pointer-events: auto;
         }
-        /* hidden state for header when modal open */
+        /* hidden state for header when modal open or scroll hide */
         .header-elements.header-hidden {
             opacity: 0;
-            transform: translateY(-8px);
+            transform: translateY(-12px);
             pointer-events: none;
         }
 
         /* cart (левый край) */
         .header-elements .cart-edge {
-            position: absolute; left: 12px; top: 12px; z-index: 70;
+            position: absolute; left: 12px; top: 12px; z-index: 130;
         }
         /* тайтл центр */
         .header-elements .header-title {
-            position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 65; font-size: 18px; font-weight: 700; color: #111827;
+            position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 125; font-size: 18px; font-weight: 700; color: #111827;
         }
         /* соц. иконки (правый край) */
         .header-elements .social-edge {
-            position: absolute; right: 12px; top: 10px; z-index: 70; display: flex; gap: 10px; align-items: center;
+            position: absolute; right: 12px; top: 10px; z-index: 130; display: flex; gap: 10px; align-items: center;
         }
 
-        .social-links a { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; transition: background-color 0.2s, transform 0.2s; }
-        .social-links a:hover { background-color: rgba(229,231,235,0.8); transform: scale(1.08); }
-        .social-links i { font-size: 18px; color: #374151; }
+        /* unified icon sizing */
+        .header-elements .icon-btn, .header-elements .social-edge a {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            transition: background-color .15s, transform .15s;
+        }
+        .header-elements .icon-btn i, .header-elements .social-edge i {
+            font-size: 18px;
+            line-height: 1;
+            color: #374151;
+        }
+        .header-elements .icon-btn:hover, .header-elements .social-edge a:hover {
+            background: rgba(229,231,235,0.7);
+            transform: translateY(-2px);
+        }
 
         .size-btn.active, .filling-btn.active { background-color: #fce7f3; border-color: #db2777; }
 
@@ -107,10 +124,10 @@
 <body class="bg-gray-100 relative">
     <div id="tsparticles"></div>
     <main class="pt-24 pb-20 px-4 max-w-7xl mx-auto relative">
-        <div class="header-elements">
+        <div class="header-elements" id="top-bar">
              <div class="cart-edge">
-                <button id="cart-btn" class="p-2 hover:bg-transparent rounded-full">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button id="cart-btn" class="icon-btn p-0 hover:bg-transparent rounded-md" aria-label="Корзина">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
                     <span id="cart-badge" class="absolute -top-1 -right-1 bg-pink-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
@@ -121,10 +138,10 @@
 
             <div class="social-edge">
                 <div class="social-links flex items-center gap-3">
-                    <a href="https://t.me/sweetworkshopp" target="_blank" class="social-link tg-link" data-social="telegram" title="Telegram">
+                    <a href="https://t.me/sweetworkshopp" target="_blank" class="icon-btn" data-social="telegram" title="Telegram">
                         <i class="fab fa-telegram-plane"></i>
                     </a>
-                    <a href="https://t.me/sweetworkshopp" target="_blank" class="social-link" data-social="instagram" title="Instagram">
+                    <a href="https://t.me/sweetworkshopp" target="_blank" class="icon-btn" data-social="instagram" title="Instagram">
                         <i class="fab fa-instagram"></i>
                     </a>
                 </div>
@@ -149,11 +166,11 @@
     <div id="cart-modal" class="fixed inset-0 bg-white z-50 transform translate-y-full transition-transform duration-300">
         <div class="flex flex-col h-full">
             <div class="flex items-center justify-between p-4 border-b bg-white shadow-sm sticky top-0">
-                <button id="cart-back-btn">
+                <button id="cart-back-btn" aria-label="Назад">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 </button>
                 <h2 class="text-xl font-bold text-gray-800">Корзина</h2>
-                <button id="cart-close-btn">
+                <button id="cart-close-btn" aria-label="Закрыть">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -165,11 +182,11 @@
     <div id="product-detail" class="fixed inset-0 bg-white z-50 transform translate-y-full transition-transform duration-300">
         <div class="flex flex-col h-full">
             <div class="flex items-center justify-between p-4 border-b bg-white shadow-sm sticky top-0">
-                <button id="detail-back-btn">
+                <button id="detail-back-btn" aria-label="Назад">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 </button>
                 <h2 id="detail-title" class="text-xl font-bold text-gray-800"></h2>
-                <button id="detail-close-btn">
+                <button id="detail-close-btn" aria-label="Закрыть">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -184,7 +201,7 @@
                 <h3 class="text-lg font-bold">Оформление заказа</h3>
                 <p class="text-sm text-gray-600">Самовывоз: <strong>Алексеева 43</strong></p>
             </div>
-            <button id="checkout-close" class="text-gray-500">
+            <button id="checkout-close" class="text-gray-500" aria-label="Закрыть">
                 <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
@@ -285,6 +302,7 @@
             elements.checkoutBackBtn.addEventListener('click', closeCheckout);
             elements.placeOrderBtn.addEventListener('click', placeOrderFromCheckout);
             startCarousel();
+            initScrollHide(); // стартуем слушатель скролла
         }
 
         function startCarousel() {
@@ -515,7 +533,7 @@
                             </div>
                         </div>
                     </div>
-                    <button onclick="addToCartById('${product.id}'); event.stopPropagation();" class="add-to-cart-btn">
+                    <button onclick="addToCartById('${product.id}'); event.stopPropagation();" class="add-to-cart-btn" aria-label="Добавить в корзину">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                     </button>
                 </div>`;
@@ -645,6 +663,62 @@
 
         function addToCartFromDetail() { if (appState.selectedProduct) { addToCartById(appState.selectedProduct.id, appState.detailQuantity || 1); closeProductDetail(); } }
         function toggleIngredients() { const list = document.getElementById('ingredients-list'); const chevron = document.getElementById('ingredients-chevron'); list.classList.toggle('hidden'); chevron.classList.toggle('rotate-180'); }
+
+        /* HIDE HEADER ON SCROLL (down) - SHOW ON SCROLL UP
+           - doesn't conflict with modal hiding
+           - uses rAF for better performance
+        */
+        function initScrollHide() {
+            let lastScrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
+            let ticking = false;
+            const header = elements.header;
+
+            function onScrollTick() {
+                const st = window.pageYOffset || document.documentElement.scrollTop || 0;
+                const delta = st - lastScrollTop;
+
+                // small deadzone
+                if (Math.abs(delta) < 10) {
+                    ticking = false;
+                    return;
+                }
+
+                // if any modal open, keep header hidden via modalState handler
+                if (modalState.cart || modalState.detail || modalState.checkout) {
+                    header.classList.add('header-hidden');
+                    lastScrollTop = st;
+                    ticking = false;
+                    return;
+                }
+
+                if (st > lastScrollTop && st > 40) {
+                    // scrolling down
+                    header.classList.add('header-hidden');
+                } else {
+                    // scrolling up
+                    if (st <= 10) {
+                        header.classList.remove('header-hidden');
+                    } else {
+                        header.classList.remove('header-hidden');
+                    }
+                }
+
+                lastScrollTop = st <= 0 ? 0 : st;
+                ticking = false;
+            }
+
+            window.addEventListener('scroll', function() {
+                if (!ticking) {
+                    window.requestAnimationFrame(onScrollTick);
+                    ticking = true;
+                }
+            }, { passive: true });
+
+            // ensure header visible on load top
+            if ((window.pageYOffset || document.documentElement.scrollTop || 0) <= 10) {
+                header.classList.remove('header-hidden');
+            }
+        }
 
         function init() {
             const savedCart = localStorage.getItem('cart');
