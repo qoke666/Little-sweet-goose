@@ -3,153 +3,227 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Little Sweet Goose</title>
+    <title>Cenelle</title>
+
+    <!-- Tailwind (cdn) -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonts: elegant serif for logo + neutral sans for UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
     <style>
+        /* ========================
+           THEME VARIABLES (CENELLE)
+           ======================== */
+        :root {
+          /* background & panels */
+          --bg: #f6f4f1;               /* мягкий тёплый фон страницы */
+          --panel: #ffffff;           /* карточки и панели */
+          --muted: #7b6f66;           /* мягкий подписьный цвет */
+          --text-primary: #1f2323;    /* основной тёмный текст */
+          /* accents */
+          --gold-dark: #b98e3d;       /* тёмное золото — основной акцент */
+          --gold-light: #ecd4a6;      /* светлое золото (градиент) */
+          --green-deep: #0f4d3f;      /* глубокий зелёный */
+          --terracotta: #a85a3a;      /* терракотовый */
+          /* UI geometry */
+          --radius-sm: 10px;
+          --radius-md: 16px;
+          --radius-lg: 26px;
+          --glass-blur: 6px;
+          --card-elev: 0 10px 30px rgba(18,22,22,0.06);
+        }
+
+        /* base */
+        html,body { height: 100%; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
             overscroll-behavior: none;
             margin: 0;
             padding: 0;
             -webkit-tap-highlight-color: transparent;
-            background-color: #f3f4f6;
+            background: var(--bg);
+            color: var(--text-primary);
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
             position: relative;
         }
-        #tsparticles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
-        .animate-zoom-in { animation: zoomIn 0.3s ease forwards; }
-        .animate-fade-in { animation: fadeIn 0.3s ease forwards; }
-        @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* tsparticles sits behind */
+        #tsparticles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+
+        /* subtle animations */
+        .animate-zoom-in { animation: zoomIn .28s ease forwards; }
+        .animate-fade-in { animation: fadeIn .28s ease forwards; }
+        @keyframes zoomIn { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .carousel { display: flex; overflow-x: auto; white-space: nowrap; scroll-behavior: smooth; touch-action: pan-x; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; position: relative; width: 343px; height: 136px; margin: 8px auto; border-radius: 6px; overflow: hidden; background: #000; max-width: 100%; }
-        .carousel::-webkit-scrollbar { display: none; }
-        .carousel a { display: block; width: 100%; height: 100%; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity .5s linear, transform .5s linear; transform: scale(1); }
-        .carousel a.active { opacity: 1; z-index: 1; transform: scale(1.02); }
-        .carousel img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .carousel .hot { position: absolute; top: 8px; left: 16px; font-size: 20px; font-weight: 500; color: #ffffff; z-index: 2; }
-        .carousel-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; z-index: 2; }
-        .carousel-dots .dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: background .3s; }
-        .carousel-dots .dot.active { background: #d5fd02; }
-
-        /* product image carousel */
-        .product-image-carousel { position: relative; width: 100%; height: 288px; overflow: hidden; border-radius: 12px; background: #e5e7eb; margin-bottom: 16px; }
-        .product-image-carousel img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; opacity: 0; transition: opacity .38s ease, transform .38s ease; transform: translateX(0); }
-        .product-image-carousel img.active { opacity: 1; z-index: 1; transform: translateX(0); }
-        .product-image-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; z-index: 2; }
-        .product-image-dots .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; transition: background .3s; }
-        .product-image-dots .dot.active { background: #ffffff; }
-
-        .cart-modal, .product-detail { height: 100dvh; max-height: 100dvh; overflow-y: auto; }
-
-        /* z-indexes: backdrop below modals so it does NOT block clicks */
-        .modal-backdrop {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.18);
-            z-index: 90; opacity: 0; pointer-events: none; transition: opacity .2s ease;
+        /* ===========
+           CAROUSEL
+           =========== */
+        .carousel {
+            display: flex;
+            overflow: hidden;
+            position: relative;
+            width: 343px;
+            height: 136px;
+            margin: 8px auto;
+            border-radius: 12px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.02));
+            box-shadow: var(--card-elev);
         }
+        .carousel a { position: absolute; inset: 0; opacity: 0; transition: opacity .45s ease, transform .45s ease; transform: scale(1); }
+        .carousel a.active { opacity: 1; z-index: 1; transform: scale(1.02); }
+        .carousel img { width:100%; height:100%; object-fit:cover; display:block; }
+
+        .carousel .hot { position: absolute; top: 8px; left: 16px; font-size: 18px; font-weight: 600; color: var(--gold-light); z-index: 2; text-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+
+        .carousel-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display:flex; gap:8px; z-index: 2; }
+        .carousel-dots .dot { width: 8px; height:8px; border-radius:999px; background: rgba(255,255,255,0.45); cursor:pointer; transition: all .2s; box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
+        .carousel-dots .dot.active { background: var(--gold-dark); transform: scale(1.15); }
+
+        /* ===========
+           PRODUCT IMAGE CAROUSEL
+           =========== */
+        .product-image-carousel { position: relative; width: 100%; height: 288px; overflow: hidden; border-radius: 14px; background: #faf7f4; margin-bottom: 16px; box-shadow: inset 0 -6px 24px rgba(0,0,0,0.02); }
+        .product-image-carousel img { width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; opacity:0; transition: opacity .38s ease, transform .38s ease; transform: translateX(0); }
+        .product-image-carousel img.active { opacity:1; z-index:1; transform: translateX(0); }
+        .product-image-dots { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:2; }
+        .product-image-dots .dot { width:8px; height:8px; border-radius:50%; background: rgba(255,255,255,0.6); cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
+        .product-image-dots .dot.active { background: var(--gold-dark); }
+
+        /* ===========
+           MODALS / BACKDROP
+           =========== */
+        .cart-modal, .product-detail { height: 100dvh; max-height: 100dvh; overflow-y: auto; }
+        .modal-backdrop { position: fixed; inset:0; background: rgba(6,6,6,0.12); z-index: 90; opacity: 0; pointer-events: none; transition: opacity .22s ease; }
         .modal-backdrop.visible { opacity: 1; pointer-events: auto; }
 
-        /* set modals above backdrop */
-        #cart-modal { z-index: 100; }
-        #product-detail { z-index: 100; }
+        #cart-modal, #product-detail { z-index: 100; background: transparent; }
         #checkout-modal { z-index: 102; }
 
-        .input-field { width: 100%; box-sizing: border-box; transition: border-color 0.2s ease; }
-        .input-field:focus { border-color: #db2777; outline: none; }
-        .quantity-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: #f3f4f6; transition: background 0.2s; }
-        .quantity-btn:hover { background: #e5e7eb; }
-        .quantity-btn svg { width: 16px; height: 16px; }
-        .hot-badge { position: absolute; top: 8px; left: 8px; background: #dc2626; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; }
-
-        /* header adjustments: transparent + pinned icons */
+        /* ========
+           HEADER
+           ======== */
         .header-elements {
-            position: fixed; top: 0; left: 0; right: 0;
+            position: fixed; top: 12px; left: 0; right: 0;
             z-index: 130;
-            padding: 0; height: 56px; background: transparent; box-shadow: none;
+            padding: 10px 16px; height: 56px; background: transparent; box-shadow: none;
             transition: opacity .22s ease, transform .22s ease;
             display: block;
             pointer-events: auto;
         }
-        /* hidden state for header when modal open or scroll hide */
-        .header-elements.header-hidden {
-            opacity: 0;
-            transform: translateY(-12px);
-            pointer-events: none;
-        }
+        .header-elements.header-hidden { opacity: 0; transform: translateY(-12px); pointer-events: none; }
 
-        /* cart (левый край) */
-        .header-elements .cart-edge {
-            position: absolute; left: 12px; top: 12px; z-index: 140;
-        }
-        /* тайтл центр */
+        .header-elements .cart-edge { position: absolute; left: 12px; top: 10px; z-index: 140; }
         .header-elements .header-title {
-            position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 135; font-size: 18px; font-weight: 700; color: #111827;
+            position: absolute; left: 50%; top: 8px; transform: translateX(-50%); z-index: 135;
+            font-size: 20px; font-weight: 700; color: var(--text-primary);
+            font-family: "Playfair Display", serif;
+            letter-spacing: .6px;
         }
-        /* соц. иконки (правый край) */
-        .header-elements .social-edge {
-            position: absolute; right: 12px; top: 10px; z-index: 140; display: flex; gap: 10px; align-items: center;
-        }
+        .header-elements .social-edge { position: absolute; right: 12px; top: 8px; z-index: 140; display:flex; gap:10px; align-items:center; }
 
-        /* unified icon sizing — removed white bg (transparent) */
         .header-elements .icon-btn, .header-elements .social-edge a {
-            width: 40px;
-            height: 40px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
+            width: 44px; height: 44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px;
             transition: background-color .15s, transform .15s;
-            background: transparent; /* <-- removed white background */
-            border: none;
+            background: rgba(255,255,255,0.88);
+            box-shadow: 0 6px 18px rgba(34,40,35,0.04);
+            border: 1px solid rgba(0,0,0,0.03);
         }
-        .header-elements .icon-btn i, .header-elements .social-edge i, .header-elements .icon-btn svg {
-            font-size: 18px;
-            line-height: 1;
-            color: #374151;
+        .header-elements .icon-btn i, .header-elements .social-edge i { font-size:18px; color: var(--muted); }
+        .header-elements .icon-btn:hover, .header-elements .social-edge a:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(18,22,22,0.06); }
+
+        /* remove original white backgrounds inside product card icon buttons */
+        .icon-btn.hover\:bg-transparent:hover { background: rgba(255,255,255,0.9); }
+
+        /* ===========
+           FORM / INPUTS
+           =========== */
+        .input-field { width:100%; box-sizing:border-box; transition: border-color .18s ease, box-shadow .18s ease; border:1px solid rgba(0,0,0,0.06); background: #fff; color:var(--text-primary); }
+        .input-field:focus { border-color: var(--gold-dark); outline: none; box-shadow: 0 6px 18px rgba(185,142,61,0.06); }
+
+        /* quantity buttons */
+        .quantity-btn { display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:999px; background: #f4f1ee; transition: background .15s ease, transform .12s; border: none; }
+        .quantity-btn:hover { transform: translateY(-2px); background: #efeae5; }
+        .quantity-btn svg { width:14px; height:14px; color: var(--muted); }
+
+        /* hot badge */
+        .hot-badge { position:absolute; top: 10px; left:10px; background: var(--terracotta); color: white; padding:6px 10px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:0.3px; box-shadow: 0 6px 18px rgba(168,90,58,0.12); }
+
+        /* add-to-cart floating btn on card */
+        .add-to-cart-btn {
+            position:absolute; bottom:12px; right:12px; width:44px; height:44px; background: linear-gradient(180deg,var(--gold-dark), var(--gold-light));
+            border-radius: 12px; color: #fff; display:flex; align-items:center; justify-content:center;
+            box-shadow: 0 10px 28px rgba(11,12,12,0.12); transition: transform .14s ease, box-shadow .14s;
+            border: none; z-index: 10;
         }
-        .header-elements .icon-btn:hover, .header-elements .social-edge a:hover {
-            background: rgba(229,231,235,0.12);
-            transform: translateY(-2px);
+        .add-to-cart-btn:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 18px 40px rgba(11,12,12,0.14); }
+
+        /* fly image */
+        .fly-img { position: fixed; pointer-events:none; z-index:2200; transition: transform .85s cubic-bezier(.22,.9,.32,1), opacity .6s; will-change: transform, opacity; border-radius:12px; box-shadow: 0 10px 28px rgba(0,0,0,0.18); }
+
+        /* checkout modal styles (sheet) */
+        #checkout-modal {
+            position: fixed; left:0; right:0; bottom:0; z-index:102; transform: translateY(110%); transition: transform .28s ease;
+            background: var(--panel); border-top-left-radius: 18px; border-top-right-radius: 18px; box-shadow: 0 -10px 38px rgba(8,10,10,0.06); max-height:85vh; overflow:auto;
         }
+        #checkout-modal.open { transform: translateY(0); }
 
-        .size-btn.active, .filling-btn.active { background-color: #fce7f3; border-color: #db2777; }
+        /* product card base (we override some tailwind defaults visually) */
+        .product-card {
+            background: var(--panel);
+            border-radius: var(--radius-md);
+            padding: 0;
+            box-shadow: var(--card-elev);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            transition: transform .28s cubic-bezier(.2,.9,.2,1), box-shadow .28s;
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+        .product-card:hover { transform: translateY(-6px); box-shadow: 0 20px 46px rgba(12,16,12,0.08); cursor: pointer; }
 
-        /* Центрируем картинку начинки */
-        .filling-image-container { aspect-ratio: 4/3; max-height: 96px; overflow: hidden; display: flex; justify-content: center; align-items: center; }
-        .filling-image { display: block; margin: 0 auto; max-width: 85%; max-height: 88px; object-fit: contain; border-radius: 8px; }
+        .product-card img { display:block; width:100%; height:100%; object-fit: cover; }
 
-        .btn-primary { transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
-        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); }
-        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
-        .add-to-cart-btn { position: absolute; bottom: 12px; right: 12px; width: 40px; height: 40px; background-color: #db2777; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); transition: all 0.2s ease-in-out; border: none; z-index: 10; }
-        .add-to-cart-btn:hover { transform: scale(1.1); background-color: #c41d68; }
-        .add-to-cart-btn svg { width: 24px; height: 24px; }
+        .product-card .p-4 { padding: 16px; }
+
+        /* filling image container */
+        .filling-image-container { aspect-ratio:4/3; max-height: 96px; overflow:hidden; display:flex; justify-content:center; align-items:center; }
+        .filling-image { display:block; margin:0 auto; max-width: 86%; max-height:88px; object-fit:contain; border-radius:8px; }
+
+        /* badges & CTA (override tailwind pink classes to preserve JS-generated classes) */
+        .text-pink-600 { color: var(--gold-dark) !important; }
+        .bg-pink-600 { background: linear-gradient(90deg, var(--green-deep), var(--gold-dark)) !important; color: #fff !important; }
+        .bg-pink-50 { background: linear-gradient(180deg, rgba(236,212,166,0.22), rgba(236,212,166,0.09)) !important; }
+        .border-pink-300 { border-color: rgba(185,142,61,0.22) !important; }
+        .text-gray-800 { color: var(--text-primary) !important; }
+        .text-gray-600 { color: var(--muted) !important; }
+        .border { border-color: rgba(0,0,0,0.06) !important; }
+        .btn-primary { border-radius: 12px; font-weight: 700; box-shadow: 0 8px 22px rgba(11,12,12,0.08); }
+
+        /* small helpers */
+        .line-clamp-1 { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .line-clamp-2 { display:block; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+
         @media (min-width: 768px) {
-            .product-card { transition: transform 0.2s ease; }
+            .product-card { transition: transform .2s ease; }
             .product-card:hover { transform: translateY(-4px); }
         }
 
-        /* fly-to-cart image */
-        .fly-img {
-            position: fixed;
-            pointer-events: none;
-            z-index: 2200;
-            transition: transform 0.85s cubic-bezier(.22,.9,.32,1), opacity 0.6s ease;
-            will-change: transform, opacity;
-            border-radius: 8px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.18);
-        }
+        /* notification */
+        .notification { position: fixed; bottom: 18px; left:50%; transform: translateX(-50%); z-index:2200; padding: 10px 16px; border-radius: 12px; font-weight:700; color:#fff; box-shadow: 0 10px 30px rgba(0,0,0,0.12); }
 
-        /* checkout modal */
-        #checkout-modal { position: fixed; left: 0; right: 0; bottom: 0; z-index: 102; transform: translateY(110%); transition: transform .28s ease; background: white; border-top-left-radius: 12px; border-top-right-radius: 12px; box-shadow: 0 -6px 24px rgba(0,0,0,0.12); max-height: 85vh; overflow: auto; }
-        #checkout-modal.open { transform: translateY(0); }
-        /* ensure cart items scroll correctly */
-        #cart-content .cart-list { max-height: calc(100vh - 220px); overflow: auto; padding: 1rem; }
-
+        /* small responsive tuning */
+        main.max-w-7xl { max-width: 1100px; }
     </style>
 </head>
-<body class="bg-gray-100 relative">
+<body class="relative">
+
     <div id="tsparticles"></div>
 
     <!-- backdrop (used when product detail or cart or checkout open) -->
@@ -166,7 +240,7 @@
                 </button>
             </div>
 
-            <div class="header-title">Little Sweet Goose</div>
+            <div class="header-title">Cenelle</div>
 
             <div class="social-edge">
                 <div class="social-links flex items-center gap-3">
@@ -261,13 +335,24 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
     <script>
         AOS.init({ duration: 800, once: true, offset: 100 });
         window.addEventListener('load', () => { AOS.refresh(); });
 
         if (typeof tsParticles !== 'undefined') {
             tsParticles.load("tsparticles", {
-                fpsLimit: 60, particles: { number: { value: 150, density: { enable: true, value_area: 800 } }, color: { value: "#FF69B4" }, shape: { type: "circle" }, opacity: { value: 0.5, random: true }, size: { value: 2, random: { enable: true, minimumValue: 0.5 } }, move: { enable: true, speed: 0.5, direction: "none", random: true, outModes: { default: "out" } } }, interactivity: { events: { onHover: { enable: false } } }, detect_retina: true
+                fpsLimit: 60,
+                particles: {
+                    number: { value: 90, density: { enable: true, value_area: 800 } },
+                    color: { value: ["#b98e3d", "#ecd4a6"] },
+                    shape: { type: "circle" },
+                    opacity: { value: 0.45, random: true },
+                    size: { value: 2, random: { enable: true, minimumValue: 0.5 } },
+                    move: { enable: true, speed: 0.6, direction: "none", random: true, outModes: { default: "out" } }
+                },
+                interactivity: { events: { onHover: { enable: false } } },
+                detect_retina: true
             });
         }
 
@@ -276,6 +361,7 @@
             window.Telegram.WebApp.expand();
         }
 
+        /* ---------- ORIGINAL APP STATE & DATA (kept intact) ---------- */
         const appState = {
             cart: [], selectedProduct: null, selectedSize: 'S', selectedFilling: null, productImageIndex: 0, detailQuantity: 1
         };
@@ -288,6 +374,7 @@
             { id: '5', name: 'Мадлен', description: 'Нежные французские бисквитные печенья в форме ракушек', price: 80, fillings: [ { name: 'Красный бархат с малиной', image: 'https://i.postimg.cc/4yq0XsBy/photo-2024-12-09-18-40-29.jpg' }, { name: 'Шоколад-кофе-апельсин', image: 'https://via.placeholder.com/300?text=Choco+Coffee+Orange' }, { name: 'Фисташка-малина', image: 'https://via.placeholder.com/300?text=Pistachio+Raspberry' }, { name: 'Маковый лимон', image: 'https://via.placeholder.com/300?text=Poppy+Lemon' } ], images: ['https://via.placeholder.com/150?text=Madeleine1', 'https://via.placeholder.com/150?text=Madeleine2'], cartImage: 'https://i.postimg.cc/4yq0XsBy/photo-2024-12-09-18-40-29.jpg', category: 'madeleine', isHot: false, volume: '1 шт', ingredients: ['Пшеничная мука', 'Сливочное масло', 'Яйца', 'Сахар', 'Лимонная цедра'] }
         ];
 
+        /* ---------- ELEMENT REFERENCES ---------- */
         const elements = {
             header: document.querySelector('.header-elements'),
             cartBtn: document.getElementById('cart-btn'),
@@ -322,7 +409,6 @@
             const anyOpen = modalState.cart || modalState.detail || modalState.checkout;
             if (elements.header) {
                 elements.header.classList.toggle('header-hidden', anyOpen);
-                // backdrop
                 elements.modalBackdrop.classList.toggle('visible', anyOpen);
                 elements.modalBackdrop.setAttribute('aria-hidden', !anyOpen);
             }
@@ -660,7 +746,7 @@
 
         function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
-            notification.className = `fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-lg text-white font-semibold animate-zoom-in shadow-lg ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+            notification.className = `notification animate-zoom-in ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
             notification.textContent = message;
             document.body.appendChild(notification);
             setTimeout(() => notification.remove(), 4000);
