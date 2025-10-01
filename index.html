@@ -83,9 +83,9 @@
         #checkout-modal { z-index: 102; }
 
         /* --- Header --- */
-        .header-elements { position: fixed; top: var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px)); left: 0; right: 0; z-index: 130; padding: 0; height: 56px; background: transparent; box-shadow: none; transition: opacity .22s ease, transform .22s ease; display: block; pointer-events: auto; }
+        .header-elements { position: fixed; top: calc(var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px)) + 20px); left: 0; right: 0; z-index: 130; padding: 0; height: 56px; background: transparent; box-shadow: none; transition: opacity .22s ease, transform .22s ease; display: block; pointer-events: auto; }
         .header-elements.header-hidden { opacity: 0; transform: translateY(-12px); pointer-events: none; }
-        .header-elements .cart-edge { position: absolute; left: 12px; top: 12px; z-index: 140; }
+        .header-elements .cart-edge { position: absolute; left: 12px; top: 12px; z-index: 140; display: flex; gap: 10px; align-items: center; }
         .header-elements .header-title { position: absolute; left: 50%; top: 16px; transform: translateX(-50%); z-index: 135; font-size: 22px; font-weight: 700; color: var(--cream); }
         .header-elements .social-edge { position: absolute; right: 12px; top: 10px; z-index: 140; display: flex; gap: 10px; align-items: center; }
         .header-elements .icon-btn, .header-elements .social-edge a { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; transition: background-color .15s, transform .15s; background: transparent; border: none; }
@@ -97,7 +97,7 @@
         /* --- Main Content --- */
         main h2 { color: var(--cream); }
         main #products-count { color: rgba(250, 243, 236, 0.6); }
-        main { padding-top: calc(56px + var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px))); padding-bottom: calc(20px + var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))); }
+        main { padding-top: calc(76px + var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px))); padding-bottom: calc(20px + var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))); }
 
         /* --- Product Card --- */
         .product-card {
@@ -274,6 +274,11 @@
                      </svg>
                      <span id="cart-badge" class="absolute -top-1 -right-1 bg-pink-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
                  </button>
+                 <button id="profile-btn" class="icon-btn p-0 hover:bg-transparent rounded-md" aria-label="Профиль">
+                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                     </svg>
+                 </button>
              </div>
 
              <div class="header-title">Cenelle</div>
@@ -286,11 +291,6 @@
                      <a href="https://www.instagram.com/thelimitedclub.cpa" target="_blank" class="icon-btn" data-social="instagram" title="Instagram">
                          <i class="fab fa-instagram"></i>
                      </a>
-                     <button id="profile-btn" class="icon-btn p-0 hover:bg-transparent rounded-md" aria-label="Профиль">
-                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                         </svg>
-                     </button>
                  </div>
              </div>
         </div>
