@@ -97,7 +97,7 @@
         /* --- Main Content --- */
         main h2 { color: var(--cream); }
         main #products-count { color: rgba(250, 243, 236, 0.6); }
-        main { padding-top: calc(76px + var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px))); padding-bottom: calc(20px + var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))); }
+        main { padding-top: calc(56px + var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px)) + 20px); padding-bottom: calc(20px + var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))); }
 
         /* --- Product Card --- */
         .product-card {
@@ -268,16 +268,16 @@
     <main class="pt-24 pb-20 px-4 max-w-7xl mx-auto relative">
         <div class="header-elements" id="top-bar">
              <div class="cart-edge">
+                 <button id="profile-btn" class="icon-btn p-0 hover:bg-transparent rounded-md" aria-label="Профиль">
+                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                     </svg>
+                 </button>
                  <button id="cart-btn" class="icon-btn p-0 hover:bg-transparent rounded-md" aria-label="Корзина">
                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                      </svg>
                      <span id="cart-badge" class="absolute -top-1 -right-1 bg-pink-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
-                 </button>
-                 <button id="profile-btn" class="icon-btn p-0 hover:bg-transparent rounded-md" aria-label="Профиль">
-                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                     </svg>
                  </button>
              </div>
 
