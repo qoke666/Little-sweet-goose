@@ -654,13 +654,22 @@
             window.addEventListener('scroll', function() { if (!ticking) { window.requestAnimationFrame(onScrollTick); ticking = true; } }, { passive: true });
             if ((window.pageYOffset || document.documentElement.scrollTop || 0) <= SHOW_NEAR_TOP) { header.classList.remove('header-hidden'); }
         }
-        // Новая функция для загрузки баллов лояльности
+        // Новая функция для загрузки баллов лояльности с кэшированием (заимствовано из скрипта)
         async function getLoyaltyPoints() {
             const telegram = window.Telegram.WebApp;
             const user = telegram.initDataUnsafe.user;
             if (!user) {
                 console.log('No user data available');
                 return;
+            }
+            const cacheKey = 'loyalty_points_cache';
+            const cached = localStorage.getItem(cacheKey);
+            if (cached) {
+                const { points, timestamp } = JSON.parse(cached);
+                if (Date.now() - timestamp < 60 * 1000) { // 60 секунд, как в App Script
+                    document.getElementById('points-value').textContent = points || 0;
+                    return;
+                }
             }
             try {
                 const response = await fetch('https://script.google.com/macros/s/AKfycbyAq2_5piTuUqFu4FxAc1I-3I31nS6SBFxbZVDDbkIPgKyqT3QdcdxjPX8QXIcgjnpS-g/exec', {
@@ -670,7 +679,9 @@
                 });
                 const json = await response.json();
                 if (json.status === 'ok') {
-                    document.getElementById('points-value').textContent = json.points || 0;
+                    const points = json.points || 0;
+                    document.getElementById('points-value').textContent = points;
+                    localStorage.setItem(cacheKey, JSON.stringify({ points, timestamp: Date.now() }));
                 }
             } catch (error) {
                 console.error('Error fetching loyalty points:', error);
