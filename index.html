@@ -71,15 +71,15 @@
         .product-image-dots .dot.active { background: var(--cream); }
 
         /* Modals & Backdrop */
-        .cart-modal, .product-detail, .profile-modal { height: 100dvh; max-height: 100dvh; overflow-y: auto; }
+        .cart-modal, .product-detail { height: 100dvh; max-height: 100dvh; overflow-y: auto; }
         .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 90; opacity: 0; pointer-events: none; transition: opacity .2s ease; }
         .modal-backdrop.visible { opacity: 1; pointer-events: auto; }
 
-        #cart-modal, #product-detail, #profile-modal, #checkout-modal { z-index: 100; }
+        #cart-modal, #product-detail, #checkout-modal { z-index: 100; }
         #checkout-modal { z-index: 102; }
 
         /* --- Header --- */
-        .header-elements { position: fixed; top: 60px; left: 0; right: 0; z-index: 130; padding: 0; height: 56px; background: transparent; box-shadow: none; transition: opacity .22s ease, transform .22s ease; display: block; pointer-events: auto; }
+        .header-elements { position: fixed; top: 0; left: 0; right: 0; z-index: 130; padding: 0; height: 56px; background: transparent; box-shadow: none; transition: opacity .22s ease, transform .22s ease; display: block; pointer-events: auto; }
         .header-elements.header-hidden { opacity: 0; transform: translateY(-12px); pointer-events: none; }
         .header-elements .cart-edge { position: absolute; left: 12px; top: 12px; z-index: 140; }
         .header-elements .header-title { position: absolute; left: 50%; top: 16px; transform: translateX(-50%); z-index: 135; font-size: 22px; font-weight: 700; color: var(--cream); }
@@ -93,7 +93,6 @@
         /* --- Main Content --- */
         main h2 { color: var(--cream); }
         main #products-count { color: rgba(250, 243, 236, 0.6); }
-        main { padding-top: 100px; }
 
         /* --- Product Card --- */
         .product-card {
@@ -192,7 +191,7 @@
         label.font-semibold { color: var(--cream); }
 
         /* --- Modals Redesign --- */
-        #cart-modal, #product-detail, #profile-modal {
+        #cart-modal, #product-detail {
             background-color: var(--dark-green);
             transform: translateY(100%);
         }
@@ -200,7 +199,6 @@
             background-color: var(--dark-green) !important;
             border-bottom: 1px solid rgba(184, 154, 106, 0.2) !important;
             box-shadow: none !important;
-            top: 60px;
         }
         .sticky.bottom-0 {
             background-color: var(--dark-green) !important;
@@ -251,6 +249,30 @@
         /* fly-to-cart image */
         .fly-img { position: fixed; pointer-events: none; z-index: 2200; transition: transform 0.85s cubic-bezier(.22,.9,.32,1), opacity 0.6s ease; will-change: transform, opacity; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.18); }
 
+        /* Loyalty Points Style */
+        #loyalty-points {
+            background-color: var(--dark-green-light);
+            border: 1px solid rgba(184, 154, 106, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--cream);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            transition: transform 0.2s ease;
+        }
+        #loyalty-points:hover {
+            transform: translateY(-2px);
+        }
+        #points-value {
+            color: var(--antique-gold);
+            font-weight: 700;
+        }
+
     </style>
 </head>
 <body class="relative">
@@ -272,9 +294,6 @@
              <div class="header-title">Cenelle</div>
 
              <div class="social-edge">
-                 <button id="profile-btn" class="icon-btn p-0 hover:bg-transparent rounded-md" aria-label="Профиль">
-                     <i class="fas fa-user"></i>
-                 </button>
                  <div class="social-links flex items-center gap-3">
                      <a href="https://t.me/sweetworkshopp" target="_blank" class="icon-btn" data-social="telegram" title="Telegram">
                          <i class="fab fa-telegram-plane"></i>
@@ -291,6 +310,12 @@
             <a href="#"><img src="https://i.postimg.cc/wBN4QCxY/Group-8.png" alt="promo2"></a>
             <div class="hot"></div>
             <div class="carousel-dots"><div class="dot active"></div><div class="dot"></div></div>
+        </div>
+
+        <!-- Новый раздел для баллов лояльности -->
+        <div id="loyalty-points" class="my-4">
+            <i class="fas fa-star text-antique-gold"></i>
+            Ваши баллы: <span id="points-value">0</span>
         </div>
 
         <div class="flex items-center justify-between my-5">
@@ -330,26 +355,6 @@
         </div>
     </div>
 
-    <div id="profile-modal" class="fixed inset-0 transform transition-transform duration-300" aria-hidden="true">
-        <div class="flex flex-col h-full">
-            <div class="flex items-center justify-between p-4 border-b sticky top-0">
-                <button id="profile-back-btn" aria-label="Назад">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                </button>
-                <h2 class="text-xl font-bold">Профиль</h2>
-                <button id="profile-close-btn" aria-label="Закрыть">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <div id="profile-content" class="flex-1 overflow-auto p-4">
-                <div class="text-center mb-6">
-                    <h3 class="text-lg font-bold">Ваши баллы лояльности</h3>
-                    <p id="loyalty-points" class="text-3xl font-bold text-antique-gold">0</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div id="checkout-modal" aria-hidden="true">
         <div class="p-4 border-b flex items-start gap-3">
             <div class="flex-1">
@@ -369,10 +374,7 @@
                 <label class="text-sm font-semibold">Телефон для связи</label>
                 <input id="checkout-phone" type="tel" placeholder="+7 (999) 123-45-67" class="input-field p-3 text-sm w-full" required>
             </div>
-            <div class="flex items-center justify-between font-bold text-base pt-3 border-t" style="border-color: rgba(184, 154, 106, 0.2);">
-                <span>Использовать баллы (макс. 30%)</span>
-                <input id="use-points" type="checkbox" class="w-5 h-5">
-            </div>
+
             <div class="flex items-center justify-between font-bold text-base pt-3 border-t" style="border-color: rgba(184, 154, 106, 0.2);">
                 <span>Итого</span><span id="checkout-total">0 ₽</span>
             </div>
@@ -424,7 +426,7 @@
         }
 
         const appState = {
-            cart: [], selectedProduct: null, selectedSize: 'S', selectedFilling: null, productImageIndex: 0, detailQuantity: 1, loyaltyPoints: 0, usePoints: false
+            cart: [], selectedProduct: null, selectedSize: 'S', selectedFilling: null, productImageIndex: 0, detailQuantity: 1
         };
 
         const products = [
@@ -436,11 +438,11 @@
         ];
 
         const elements = {
-            header: document.querySelector('.header-elements'), cartBtn: document.getElementById('cart-btn'), cartBadge: document.getElementById('cart-badge'), promoCarousel: document.querySelector('.carousel'), productsGrid: document.getElementById('products-grid'), productsCount: document.getElementById('products-count'), cartModal: document.getElementById('cart-modal'), cartBackBtn: document.getElementById('cart-back-btn'), cartCloseBtn: document.getElementById('cart-close-btn'), cartContent: document.getElementById('cart-content'), productDetail: document.getElementById('product-detail'), detailBackBtn: document.getElementById('detail-back-btn'), detailCloseBtn: document.getElementById('detail-close-btn'), detailTitle: document.getElementById('detail-title'), detailContent: document.getElementById('detail-content'), checkoutModal: document.getElementById('checkout-modal'), checkoutClose: document.getElementById('checkout-close'), checkoutBackBtn: document.getElementById('checkout-back-btn'), placeOrderBtn: document.getElementById('place-order-btn'), checkoutTotal: document.getElementById('checkout-total'), checkoutDate: document.getElementById('checkout-date'), checkoutTime: document.getElementById('checkout-time'), checkoutPhone: document.getElementById('checkout-phone'), placeOrderBtnElement: document.getElementById('place-order-btn'), modalBackdrop: document.getElementById('modal-backdrop'), profileBtn: document.getElementById('profile-btn'), profileModal: document.getElementById('profile-modal'), profileBackBtn: document.getElementById('profile-back-btn'), profileCloseBtn: document.getElementById('profile-close-btn'), profileContent: document.getElementById('profile-content'), loyaltyPointsEl: document.getElementById('loyalty-points'), usePointsCheckbox: document.getElementById('use-points')
+            header: document.querySelector('.header-elements'), cartBtn: document.getElementById('cart-btn'), cartBadge: document.getElementById('cart-badge'), promoCarousel: document.querySelector('.carousel'), productsGrid: document.getElementById('products-grid'), productsCount: document.getElementById('products-count'), cartModal: document.getElementById('cart-modal'), cartBackBtn: document.getElementById('cart-back-btn'), cartCloseBtn: document.getElementById('cart-close-btn'), cartContent: document.getElementById('cart-content'), productDetail: document.getElementById('product-detail'), detailBackBtn: document.getElementById('detail-back-btn'), detailCloseBtn: document.getElementById('detail-close-btn'), detailTitle: document.getElementById('detail-title'), detailContent: document.getElementById('detail-content'), checkoutModal: document.getElementById('checkout-modal'), checkoutClose: document.getElementById('checkout-close'), checkoutBackBtn: document.getElementById('checkout-back-btn'), placeOrderBtn: document.getElementById('place-order-btn'), checkoutTotal: document.getElementById('checkout-total'), checkoutDate: document.getElementById('checkout-date'), checkoutTime: document.getElementById('checkout-time'), checkoutPhone: document.getElementById('checkout-phone'), placeOrderBtnElement: document.getElementById('place-order-btn'), modalBackdrop: document.getElementById('modal-backdrop')
         };
-        const modalState = { cart: false, detail: false, checkout: false, profile: false };
+        const modalState = { cart: false, detail: false, checkout: false };
         function updateHeaderVisibility() {
-            const anyOpen = modalState.cart || modalState.detail || modalState.checkout || modalState.profile;
+            const anyOpen = modalState.cart || modalState.detail || modalState.checkout;
             if (elements.header) {
                 elements.header.classList.toggle('header-hidden', anyOpen);
                 elements.modalBackdrop.classList.toggle('visible', anyOpen);
@@ -450,9 +452,8 @@
         function initEventListeners() {
             elements.cartBtn.addEventListener('click', openCart); elements.cartBackBtn.addEventListener('click', closeCart); elements.cartCloseBtn.addEventListener('click', closeCart); elements.detailBackBtn.addEventListener('click', closeProductDetail); elements.detailCloseBtn.addEventListener('click', closeProductDetail); elements.checkoutClose.addEventListener('click', closeCheckout); elements.checkoutBackBtn.addEventListener('click', closeCheckout); elements.placeOrderBtn.addEventListener('click', placeOrderFromCheckout);
             elements.modalBackdrop.addEventListener('click', () => {
-                if (modalState.checkout) closeCheckout(); else if (modalState.cart) closeCart(); else if (modalState.detail) closeProductDetail(); else if (modalState.profile) closeProfile();
+                if (modalState.checkout) closeCheckout(); else if (modalState.cart) closeCart(); else if (modalState.detail) closeProductDetail();
             });
-            elements.profileBtn.addEventListener('click', openProfile); elements.profileBackBtn.addEventListener('click', closeProfile); elements.profileCloseBtn.addEventListener('click', closeProfile); elements.usePointsCheckbox.addEventListener('change', () => { appState.usePoints = elements.usePointsCheckbox.checked; updateCheckoutTotal(); });
             startCarousel(); initScrollHide();
         }
         function startCarousel() {
@@ -597,12 +598,7 @@
             modalState.checkout = false; elements.checkoutModal.classList.remove('open'); elements.checkoutModal.setAttribute('aria-hidden', 'true'); setTimeout(updateHeaderVisibility, 50);
         }
         function updateCheckoutTotal() {
-            let totalAmount = appState.cart.reduce((sum, item) => { const product = products.find(p => p.id === item.id); const size = product && product.sizes ? product.sizes.find(s => s.size === item.selectedSize) : null; return sum + (size ? size.price : item.price) * item.quantity; }, 0);
-            if (appState.usePoints) {
-                const maxDiscount = Math.floor(totalAmount * 0.3);
-                const discount = Math.min(appState.loyaltyPoints, maxDiscount);
-                totalAmount -= discount;
-            }
+            const totalAmount = appState.cart.reduce((sum, item) => { const product = products.find(p => p.id === item.id); const size = product && product.sizes ? product.sizes.find(s => s.size === item.selectedSize) : null; return sum + (size ? size.price : item.price) * item.quantity; }, 0);
             elements.checkoutTotal.textContent = `${totalAmount} ₽`;
         }
         function placeOrderFromCheckout() { placeOrder(); }
@@ -612,18 +608,12 @@
             if (appState.cart.length === 0) { showNotification('Корзина пуста', 'error'); return; }
             checkoutButton.disabled = true;
             checkoutButton.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Заказ формируется...`;
-            let totalAmount = appState.cart.reduce((sum, item) => { const product = products.find(p => p.id === item.id); const size = product && product.sizes ? product.sizes.find(s => s.size === item.selectedSize) : null; return sum + (size ? size.price : item.price) * item.quantity; }, 0);
-            let pointsUsed = 0;
-            if (appState.usePoints) {
-                const maxDiscount = Math.floor(totalAmount * 0.3);
-                pointsUsed = Math.min(appState.loyaltyPoints, maxDiscount);
-                totalAmount -= pointsUsed;
-            }
+            const totalAmount = appState.cart.reduce((sum, item) => { const product = products.find(p => p.id === item.id); const size = product && product.sizes ? product.sizes.find(s => s.size === item.selectedSize) : null; return sum + (size ? size.price : item.price) * item.quantity; }, 0);
             const telegram = window.Telegram?.WebApp; const user = telegram?.initDataUnsafe?.user || {};
             const orderData = {
                 event: 'order_submit', user_id: user.id || 'unknown', username: user.username || '', first_name: user.first_name || '', last_name: user.last_name || '', timestamp: new Date().toISOString(), url: window.location.href, userAgent: navigator.userAgent,
                 additional: {
-                    order_id: `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, order_details: appState.cart.map(item => ({ id: item.id, name: item.name, price: products.find(p => p.id === item.id).sizes ? products.find(p => p.id === item.id).sizes.find(s => s.size === item.selectedSize).price : item.price, quantity: item.quantity, size: item.selectedSize, filling: item.selectedFilling || null })), total_amount: totalAmount, delivery_type: 'pickup', delivery_fee: 0, final_amount: totalAmount, date: dateInput.value, time: timeInput.value, address: 'Алексеева 43', phone: phoneInput.value, points_used: pointsUsed
+                    order_id: `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, order_details: appState.cart.map(item => ({ id: item.id, name: item.name, price: products.find(p => p.id === item.id).sizes ? products.find(p => p.id === item.id).sizes.find(s => s.size === item.selectedSize).price : item.price, quantity: item.quantity, size: item.selectedSize, filling: item.selectedFilling || null })), total_amount: totalAmount, delivery_type: 'pickup', delivery_fee: 0, final_amount: totalAmount, date: dateInput.value, time: timeInput.value, address: 'Алексеева 43', phone: phoneInput.value
                 }
             };
             fetch('https://script.google.com/macros/s/AKfycbyAq2_5piTuUqFu4FxAc1I-3I31nS6SBFxbZVDDbkIPgKyqT3QdcdxjPX8QXIcgjnpS-g/exec', {
@@ -632,7 +622,6 @@
             .then(() => {
                 showNotification('Заказ успешно оформлен! Ожидайте подтверждения. Оплата наличными.', 'success');
                 clearCart(); closeCheckout(); closeCart(); checkoutButton.disabled = false; checkoutButton.textContent = 'Оформить заказ';
-                fetchLoyaltyPoints();
             })
             .catch(error => {
                 console.error('Error sending order:', error); showNotification('Ошибка при отправке заказа', 'error'); checkoutButton.disabled = false; checkoutButton.textContent = 'Оформить заказ';
@@ -658,36 +647,41 @@
             let lastScrollTop = window.pageYOffset || document.documentElement.scrollTop || 0; let ticking = false; const header = elements.header; const SHOW_NEAR_TOP = 120;
             function onScrollTick() {
                 const st = window.pageYOffset || document.documentElement.scrollTop || 0;
-                if (modalState.cart || modalState.detail || modalState.checkout || modalState.profile) { header.classList.add('header-hidden'); lastScrollTop = st; ticking = false; return; }
+                if (modalState.cart || modalState.detail || modalState.checkout) { header.classList.add('header-hidden'); lastScrollTop = st; ticking = false; return; }
                 if (st <= SHOW_NEAR_TOP) { header.classList.remove('header-hidden'); } else { if (st > lastScrollTop && st > 40) { header.classList.add('header-hidden'); } else { header.classList.remove('header-hidden'); } }
                 lastScrollTop = st <= 0 ? 0 : st; ticking = false;
             }
             window.addEventListener('scroll', function() { if (!ticking) { window.requestAnimationFrame(onScrollTick); ticking = true; } }, { passive: true });
             if ((window.pageYOffset || document.documentElement.scrollTop || 0) <= SHOW_NEAR_TOP) { header.classList.remove('header-hidden'); }
         }
-        function openProfile() {
-            modalState.profile = true; updateHeaderVisibility(); elements.profileModal.style.transform = 'translateY(0)'; elements.profileModal.setAttribute('aria-hidden', 'false'); fetchLoyaltyPoints();
-        }
-        function closeProfile() {
-            modalState.profile = false; elements.profileModal.style.transform = 'translateY(100%)'; elements.profileModal.setAttribute('aria-hidden', 'true'); setTimeout(updateHeaderVisibility, 50);
-        }
-        function fetchLoyaltyPoints() {
-            const telegram = window.Telegram?.WebApp; const user = telegram?.initDataUnsafe?.user || {};
-            const pointsData = { event: 'get_loyalty_points', user_id: user.id || 'unknown' };
-            fetch('https://script.google.com/macros/s/AKfycbyAq2_5piTuUqFu4FxAc1I-3I31nS6SBFxbZVDDbkIPgKyqT3QdcdxjPX8QXIcgjnpS-g/exec', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pointsData), mode: 'no-cors'
-            })
-            .then(response => response.json())
-            .then(data => {
-                appState.loyaltyPoints = data.points || 0;
-                elements.loyaltyPointsEl.textContent = appState.loyaltyPoints;
-            })
-            .catch(() => { appState.loyaltyPoints = 0; elements.loyaltyPointsEl.textContent = '0'; });
+        // Новая функция для загрузки баллов лояльности
+        async function getLoyaltyPoints() {
+            const telegram = window.Telegram.WebApp;
+            const user = telegram.initDataUnsafe.user;
+            if (!user) {
+                console.log('No user data available');
+                return;
+            }
+            try {
+                const response = await fetch('https://script.google.com/macros/s/AKfycbyAq2_5piTuUqFu4FxAc1I-3I31nS6SBFxbZVDDbkIPgKyqT3QdcdxjPX8QXIcgjnpS-g/exec', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ event: 'get_points', user_id: user.id })
+                });
+                const json = await response.json();
+                if (json.status === 'ok') {
+                    document.getElementById('points-value').textContent = json.points || 0;
+                }
+            } catch (error) {
+                console.error('Error fetching loyalty points:', error);
+            }
         }
         function init() {
             const savedCart = localStorage.getItem('cart');
             if (savedCart) { try { const parsedCart = JSON.parse(savedCart); if (Array.isArray(parsedCart)) appState.cart = parsedCart; } catch (e) { console.error('Could not parse cart from localStorage'); } }
-            initEventListeners(); renderProducts(); updateCartBadge(); fetchLoyaltyPoints();
+            initEventListeners(); renderProducts(); updateCartBadge();
+            // Загружаем баллы после инициализации
+            getLoyaltyPoints();
         }
         document.addEventListener('DOMContentLoaded', init);
     </script>
