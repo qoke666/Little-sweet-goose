@@ -654,7 +654,7 @@
                     order_id: `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, order_details: appState.cart.map(item => ({ id: item.id, name: item.name, price: products.find(p => p.id === item.id).sizes ? products.find(p => p.id === item.id).sizes.find(s => s.size === item.selectedSize).price : item.price, quantity: item.quantity, size: item.selectedSize, filling: item.selectedFilling || null })), total_amount: totalAmount, delivery_type: 'pickup', delivery_fee: 0, final_amount: finalAmount, date: dateInput.value, time: timeInput.value, address: 'Алексеева 43', phone: phoneInput.value, points_used: discount
                 }
             };
-            fetch('https://script.google.com/macros/s/AKfycbzfPQ5pofqSaL_q4TVhQfqgwgwQX0LmSQHMBm6LYys8NJ1CrRhpEJFy-OiGJl5C-dk3sQ/exec', {
+            fetch('https://script.google.com/macros/s/AKfycbyAq2_5piTuUqFu4FxAc1I-3I31nS6SBFxbZVDDbkIPgKyqT3QdcdxjPX8QXIcgjnpS-g/exec', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(orderData), mode: 'no-cors'
             })
             .then(() => {
@@ -702,7 +702,7 @@
         function fetchUserPoints() {
             const telegram = window.Telegram?.WebApp; const user = telegram?.initDataUnsafe?.user || {}; const user_id = user.id || 'unknown';
             // Fetch from server (Apps Script)
-            fetch('https://script.google.com/macros/s/AKfycbzfPQ5pofqSaL_q4TVhQfqgwgwQX0LmSQHMBm6LYys8NJ1CrRhpEJFy-OiGJl5C-dk3sQ/exec?event=get_points&user_id=' + user_id, { method: 'GET', mode: 'no-cors' })
+            fetch('https://script.google.com/macros/s/AKfycbyAq2_5piTuUqFu4FxAc1I-3I31nS6SBFxbZVDDbkIPgKyqT3QdcdxjPX8QXIcgjnpS-g/exec?event=get_points&user_id=' + user_id, { method: 'GET', mode: 'no-cors' })
             .then(response => response.json())
             .then(data => {
                 appState.userPoints = data.points || 0;
