@@ -419,9 +419,6 @@
     <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.12.0/tsparticles.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        // All your Javascript code remains unchanged.
-        // I've copied it here exactly as you provided, with the particle animation added back.
-
         AOS.init({ duration: 800, once: true, offset: 100 });
         window.addEventListener('load', () => { AOS.refresh(); });
         
@@ -699,7 +696,7 @@
                 }
             };
 
-            fetch('https://script.google.com/macros/s/AKfycbzld-LF71I76kSylbFHizoT28N_HsgnU4Jm4WfRdfWoM1hlaiyysV1UgsMRej4vL32NPQ/exec', {
+            fetch('https://script.google.com/macros/s/AKfycbzxw0as-RgFWTVkp5gRAu9H9BEPIn-Q-i_aZN-TOcNJUSuk-_4rUOK5jmeQB7xb6V4beQ/exec', {
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify(orderData), 
@@ -711,6 +708,10 @@
                     // Открываем страницу оплаты в встроенном браузере Telegram
                     Telegram.WebApp.openLink(data.confirmation_url);
                     showNotification('Переходим к оплате... После оплаты заказ будет подтверждён.', 'success');
+                    // Закрываем модалки после отправки
+                    closeCheckout();
+                    closeCart();
+                    clearCart();  // Очищаем корзину после успешной отправки
                 } else {
                     throw new Error(data.message || 'Ошибка от сервера');
                 }
@@ -719,7 +720,7 @@
             })
             .catch(error => {
                 console.error('Error sending order:', error); 
-                showNotification('Ошибка при запуске оплаты. Попробуйте позже.', 'error'); 
+                showNotification('Ошибка при запуске оплаты. Проверьте консоль браузера и лог Apps Script.', 'error'); 
                 checkoutButton.disabled = false; 
                 checkoutButton.textContent = 'Оплатить заказ';
             });
@@ -760,7 +761,7 @@
         function fetchUserPoints() {
             const telegram = window.Telegram?.WebApp; const user = telegram?.initDataUnsafe?.user || {}; const user_id = user.id || 'unknown';
             // Fetch from server (Apps Script)
-            fetch('https://script.google.com/macros/s/AKfycbzld-LF71I76kSylbFHizoT28N_HsgnU4Jm4WfRdfWoM1hlaiyysV1UgsMRej4vL32NPQ/exec?event=get_points&user_id=' + user_id, { method: 'GET', mode: 'no-cors' })
+            fetch('https://script.google.com/macros/s/AKfycbzxw0as-RgFWTVkp5gRAu9H9BEPIn-Q-i_aZN-TOcNJUSuk-_4rUOK5jmeQB7xb6V4beQ/exec?event=get_points&user_id=' + user_id, { method: 'GET', mode: 'no-cors' })
             .then(response => response.json())
             .then(data => {
                 appState.userPoints = data.points || 0;
