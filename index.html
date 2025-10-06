@@ -409,7 +409,7 @@
             </div>
 
             <div class="space-y-2">
-                <button id="place-order-btn" class="btn-primary w-full h-12 text-base font-semibold flex items-center justify-center gap-2">Оформить заказ</button>
+                <button id="place-order-btn" class="btn-primary w-full h-12 text-base font-semibold flex items-center justify-center gap-2">Оплатить заказ</button>
                 <button id="checkout-back-btn" class="w-full h-12 text-base">Вернуться к корзине</button>
             </div>
         </div>
@@ -633,37 +633,95 @@
             return { total: totalAmount - maxDiscount, discount: maxDiscount };
         }
         function updateCheckoutTotal() {
-            const totalAmount = appState.cart.reduce((sum, item) => { const product = products.find(p => p.id === item.id); const size = product && product.sizes ? product.sizes.find(s => s.size === item.selectedSize) : null; return sum + (size ? size.price : item.price) * item.quantity; }, 0);
+            const totalAmount = appState.cart.reduce((sum, item) => { 
+                const product = products.find(p => p.id === item.id); 
+                const size = product && product.sizes ? product.sizes.find(s => s.size === item.selectedSize) : null; 
+                return sum + (size ? size.price : item.price) * item.quantity; 
+            }, 0);
             const { total, discount } = calculateTotalWithDiscount(totalAmount);
             elements.checkoutTotal.textContent = `${total} ₽`;
             elements.loyaltyDiscount.textContent = `${discount} ₽`;
         }
         function placeOrderFromCheckout() { placeOrder(); }
         function placeOrder() {
-            const checkoutButton = elements.placeOrderBtnElement; const dateInput = elements.checkoutDate; const timeInput = elements.checkoutTime; const phoneInput = elements.checkoutPhone;
-            if (!dateInput.value || !timeInput.value || !phoneInput.value) { showNotification('Заполните все поля', 'error'); return; }
-            if (appState.cart.length === 0) { showNotification('Корзина пуста', 'error'); return; }
+            const checkoutButton = elements.placeOrderBtnElement; 
+            const dateInput = elements.checkoutDate; 
+            const timeInput = elements.checkoutTime; 
+            const phoneInput = elements.checkoutPhone;
+            if (!dateInput.value || !timeInput.value || !phoneInput.value) { 
+                showNotification('Заполните все поля', 'error'); 
+                return; 
+            }
+            if (appState.cart.length === 0) { 
+                showNotification('Корзина пуста', 'error'); 
+                return; 
+            }
             checkoutButton.disabled = true;
-            checkoutButton.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Заказ формируется...`;
-            const totalAmount = appState.cart.reduce((sum, item) => { const product = products.find(p => p.id === item.id); const size = product && product.sizes ? product.sizes.find(s => s.size === item.selectedSize) : null; return sum + (size ? size.price : item.price) * item.quantity; }, 0);
+            checkoutButton.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Идёт оплата...`;
+
+            const totalAmount = appState.cart.reduce((sum, item) => { 
+                const product = products.find(p => p.id === item.id); 
+                const size = product && product.sizes ? product.sizes.find(s => s.size === item.selectedSize) : null; 
+                return sum + (size ? size.price : item.price) * item.quantity; 
+            }, 0);
             const { total: finalAmount, discount } = calculateTotalWithDiscount(totalAmount);
-            const telegram = window.Telegram?.WebApp; const user = telegram?.initDataUnsafe?.user || {};
+
+            const telegram = window.Telegram?.WebApp; 
+            const user = telegram?.initDataUnsafe?.user || {}; 
             const orderData = {
-                event: 'order_submit', user_id: user.id || 'unknown', username: user.username || '', first_name: user.first_name || '', last_name: user.last_name || '', timestamp: new Date().toISOString(), url: window.location.href, userAgent: navigator.userAgent,
+                event: 'order_submit', 
+                user_id: user.id || 'unknown', 
+                username: user.username || '', 
+                first_name: user.first_name || '', 
+                last_name: user.last_name || '', 
+                timestamp: new Date().toISOString(), 
+                url: window.location.href, 
+                userAgent: navigator.userAgent,
                 additional: {
-                    order_id: `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, order_details: appState.cart.map(item => ({ id: item.id, name: item.name, price: products.find(p => p.id === item.id).sizes ? products.find(p => p.id === item.id).sizes.find(s => s.size === item.selectedSize).price : item.price, quantity: item.quantity, size: item.selectedSize, filling: item.selectedFilling || null })), total_amount: totalAmount, delivery_type: 'pickup', delivery_fee: 0, final_amount: finalAmount, date: dateInput.value, time: timeInput.value, address: 'Алексеева 43', phone: phoneInput.value, points_used: discount
+                    order_id: `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, 
+                    order_details: appState.cart.map(item => ({ 
+                        id: item.id, 
+                        name: item.name, 
+                        price: products.find(p => p.id === item.id).sizes ? products.find(p => p.id === item.id).sizes.find(s => s.size === item.selectedSize).price : item.price, 
+                        quantity: item.quantity, 
+                        size: item.selectedSize, 
+                        filling: item.selectedFilling || null 
+                    })), 
+                    total_amount: totalAmount, 
+                    delivery_type: 'pickup', 
+                    delivery_fee: 0, 
+                    final_amount: finalAmount, 
+                    date: dateInput.value, 
+                    time: timeInput.value, 
+                    address: 'Алексеева 43', 
+                    phone: phoneInput.value, 
+                    points_used: discount
                 }
             };
+
             fetch('https://script.google.com/macros/s/AKfycbzjdaztkhK_CYlkTL9putkkWPwZJ1Z0XF2Nu0K0q9oO_NDcMgwiA5HOmnx_Py_3pl9yrw/exec', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(orderData), mode: 'no-cors'
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(orderData), 
+                mode: 'cors'  // Изменено на 'cors' для чтения response
             })
-            .then(() => {
-                showNotification('Заказ успешно оформлен! Ожидайте подтверждения. Оплата наличными.', 'success');
-                appState.userPoints -= discount;
-                clearCart(); closeCheckout(); closeCart(); checkoutButton.disabled = false; checkoutButton.textContent = 'Оформить заказ';
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok' && data.confirmation_url) {
+                    // Открываем страницу оплаты в встроенном браузере Telegram
+                    Telegram.WebApp.openLink(data.confirmation_url);
+                    showNotification('Переходим к оплате... После оплаты заказ будет подтверждён.', 'success');
+                } else {
+                    throw new Error(data.message || 'Ошибка от сервера');
+                }
+                checkoutButton.disabled = false;
+                checkoutButton.textContent = 'Оплатить заказ';
             })
             .catch(error => {
-                console.error('Error sending order:', error); showNotification('Ошибка при отправке заказа', 'error'); checkoutButton.disabled = false; checkoutButton.textContent = 'Оформить заказ';
+                console.error('Error sending order:', error); 
+                showNotification('Ошибка при запуске оплаты. Попробуйте позже.', 'error'); 
+                checkoutButton.disabled = false; 
+                checkoutButton.textContent = 'Оплатить заказ';
             });
         }
         function changeDetailQuantity(change) {
@@ -716,6 +774,7 @@
             const savedCart = localStorage.getItem('cart');
             if (savedCart) { try { const parsedCart = JSON.parse(savedCart); if (Array.isArray(parsedCart)) appState.cart = parsedCart; } catch (e) { console.error('Could not parse cart from localStorage'); } }
             initEventListeners(); renderProducts(); updateCartBadge(); fetchUserPoints();
+            elements.placeOrderBtnElement.textContent = 'Оплатить заказ';  // Динамическое обновление, если нужно
         }
         document.addEventListener('DOMContentLoaded', init);
     </script>
