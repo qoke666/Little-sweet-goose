@@ -696,7 +696,7 @@
                 }
             };
 
-            fetch('https://script.google.com/macros/s/AKfycbzxw0as-RgFWTVkp5gRAu9H9BEPIn-Q-i_aZN-TOcNJUSuk-_4rUOK5jmeQB7xb6V4beQ/exec', {
+            fetch('https://script.google.com/macros/s/AKfycbwO9Hgp5-lLHODCMP1galdXH_8nw2TWa116a94iKMDwZCJEF5f9X_MZy6xVvQ26lvw-Sw/exec', {
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify(orderData), 
@@ -761,7 +761,7 @@
         function fetchUserPoints() {
             const telegram = window.Telegram?.WebApp; const user = telegram?.initDataUnsafe?.user || {}; const user_id = user.id || 'unknown';
             // Fetch from server (Apps Script)
-            fetch('https://script.google.com/macros/s/AKfycbzxw0as-RgFWTVkp5gRAu9H9BEPIn-Q-i_aZN-TOcNJUSuk-_4rUOK5jmeQB7xb6V4beQ/exec?event=get_points&user_id=' + user_id, { method: 'GET', mode: 'no-cors' })
+            fetch('https://script.google.com/macros/s/AKfycbwO9Hgp5-lLHODCMP1galdXH_8nw2TWa116a94iKMDwZCJEF5f9X_MZy6xVvQ26lvw-Sw/exec?event=get_points&user_id=' + user_id, { method: 'GET', mode: 'cors' })
             .then(response => response.json())
             .then(data => {
                 appState.userPoints = data.points || 0;
